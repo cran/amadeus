@@ -1,0 +1,80 @@
+## ----setup, include = FALSE---------------------------------------------------
+# packages
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = ""
+)
+library(amadeus)
+
+## ----eval = FALSE-------------------------------------------------------------
+#  dir <- tempdir()
+#  download_data(
+#    dataset_name = "narr",
+#    variable = "air.2m",
+#    year = c(2021, 2022),
+#    directory_to_save = dir,
+#    acknowledgement = TRUE,
+#    download = TRUE,
+#    remove_command = TRUE
+#  )
+
+## ----eval = FALSE-------------------------------------------------------------
+#  list.files(paste0(dir, "/air.2m"))
+
+## ----echo = FALSE-------------------------------------------------------------
+cat('[1] "air.2m.2021.nc" "air.2m.2022.nc"\n')
+
+## ----eval = FALSE-------------------------------------------------------------
+#  temp_process <- process_covariates(
+#    covariate = "narr",
+#    variable = "air.2m",
+#    date = c("2021-12-28", "2022-01-03"),
+#    path = paste0(dir, "/air.2m")
+#  )
+
+## ----eval = FALSE-------------------------------------------------------------
+#  temp_process
+
+## ----echo = FALSE-------------------------------------------------------------
+cat(
+"class       : SpatRaster 
+dimensions  : 277, 349, 7  (nrow, ncol, nlyr)
+resolution  : 32462.99, 32463  (x, y)
+extent      : -16231.49, 11313351, -16231.5, 8976020  (xmin, xmax, ymin, ymax)
+coord. ref. : +proj=lcc +lat_0=50 +lon_0=-107 +lat_1=50 +lat_2=50 +x_0=5632642.22547 +y_0=4612545.65137 +datum=WGS84 +units=m +no_defs 
+sources     : air.2m.2021.nc:air  (4 layers) 
+              air.2m.2022.nc:air  (3 layers) 
+varnames    : air (Daily Air Temperature at 2 m) 
+              air (Daily Air Temperature at 2 m) 
+names       : air.2~11228, air.2~11229, air.2~11230, air.2~11231, air.2~20101, air.2~20102, ... 
+unit        :           K,           K,           K,           K,           K,           K, ... 
+time        : 2021-12-28 to 2022-01-03 UTC\n"
+)
+
+## ----eval = FALSE-------------------------------------------------------------
+#  library(tigris)
+#  temp_covar <- calc_covariates(
+#    covariate = "narr",
+#    from = temp_process,
+#    locs = tigris::counties("NC", year = 2021),
+#    locs_id = "NAME",
+#    radius = 0,
+#    geom = TRUE
+#  )
+
+## ----eval = FALSE-------------------------------------------------------------
+#  temp_covar
+
+## ----echo = FALSE-------------------------------------------------------------
+cat(
+"class       : SpatVector 
+geometry    : polygons 
+dimensions  : 700, 3  (geometries, attributes)
+extent      : 7731783, 8506154, 3248490, 3694532  (xmin, xmax, ymin, ymax)
+coord. ref. : +proj=lcc +lat_0=50 +lon_0=-107 +lat_1=50 +lat_2=50 +x_0=5632642.22547 +y_0=4612545.65137 +datum=WGS84 +units=m +no_defs 
+names       :     NAME       time air.2m_0
+type        :    <chr>   <POSIXt>    <num>
+values      :   Chatham 2021-12-28    289.3
+               Alamance 2021-12-28    288.8
+               Davidson 2021-12-28    289.1\n")
+
