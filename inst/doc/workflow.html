@@ -395,11 +395,11 @@ time        : 2021-12-28 to 2022-01-03 UTC</code></pre>
 <div id="calculate-covariates" class="section level2">
 <h2>Calculate covariates</h2>
 <p>Calculate covariates for North Carolina county boundaries with
-<code>calc_covariates</code>. County boundaries are accessed with the
-<code>tigris::counties</code> function. <code>geom = TRUE</code> will
-return the covariates as a <code>SpatVector</code> object.</p>
+<code>calculate_covariates</code>. County boundaries are accessed with
+the <code>tigris::counties</code> function. <code>geom = TRUE</code>
+will return the covariates as a <code>SpatVector</code> object.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tigris)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>temp_covar <span class="ot">&lt;-</span> <span class="fu">calc_covariates</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>temp_covar <span class="ot">&lt;-</span> <span class="fu">calculate_covariates</span>(</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">covariate =</span> <span class="st">&quot;narr&quot;</span>,</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">from =</span> temp_process,</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">locs =</span> tigris<span class="sc">::</span><span class="fu">counties</span>(<span class="st">&quot;NC&quot;</span>, <span class="at">year =</span> <span class="dv">2021</span>),</span>

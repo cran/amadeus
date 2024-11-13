@@ -53,7 +53,7 @@ time        : 2021-12-28 to 2022-01-03 UTC\n"
 
 ## ----eval = FALSE-------------------------------------------------------------
 #  library(tigris)
-#  temp_covar <- calc_covariates(
+#  temp_covar <- calculate_covariates(
 #    covariate = "narr",
 #    from = temp_process,
 #    locs = tigris::counties("NC", year = 2021),
