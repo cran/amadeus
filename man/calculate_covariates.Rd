@@ -60,7 +60,7 @@ calculate_covariates(
 }
 \seealso{
 \itemize{
-\item \code{\link{calculate_modis_par}}: "modis", "MODIS"
+\item \code{\link{calculate_modis}}: "modis", "MODIS"
 \item \code{\link{calculate_koppen_geiger}}: "koppen-geiger", "koeppen-geiger", "koppen"
 \item \code{\link{calculate_ecoregion}}: "ecoregion", "ecoregions"
 \item \code{\link{calculate_temporal_dummies}}: "dummies", "Dummies"
@@ -68,8 +68,8 @@ calculate_covariates(
 \item \code{\link{calculate_gmted}}: "gmted", "GMTED"
 \item \code{\link{calculate_narr}}: "narr", "NARR"
 \item \code{\link{calculate_geos}}: "geos", "geos_cf", "GEOS"
-\item \code{\link{calculate_sedac_population}}: "population", "sedac_population"
-\item \code{\link{calculate_sedac_groads}}: "roads", "groads", "sedac_groads"
+\item \code{\link{calculate_population}}: "population", "sedac_population"
+\item \code{\link{calculate_groads}}: "roads", "groads", "sedac_groads"
 \item \code{\link{calculate_nlcd}}: "nlcd", "NLCD"
 \item \code{\link{calculate_tri}}: "tri", "TRI"
 \item \code{\link{calculate_nei}}: "nei", "NEI"

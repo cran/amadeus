@@ -18,7 +18,7 @@
 #'  function.
 #' @note `covariate` argument value is converted to lowercase.
 #' @seealso
-#' * \code{\link{calculate_modis_par}}: "modis", "MODIS"
+#' * \code{\link{calculate_modis}}: "modis", "MODIS"
 #' * \code{\link{calculate_koppen_geiger}}: "koppen-geiger", "koeppen-geiger", "koppen"
 #' * \code{\link{calculate_ecoregion}}: "ecoregion", "ecoregions"
 #' * \code{\link{calculate_temporal_dummies}}: "dummies", "Dummies"
@@ -26,8 +26,8 @@
 #' * \code{\link{calculate_gmted}}: "gmted", "GMTED"
 #' * \code{\link{calculate_narr}}: "narr", "NARR"
 #' * \code{\link{calculate_geos}}: "geos", "geos_cf", "GEOS"
-#' * \code{\link{calculate_sedac_population}}: "population", "sedac_population"
-#' * \code{\link{calculate_sedac_groads}}: "roads", "groads", "sedac_groads"
+#' * \code{\link{calculate_population}}: "population", "sedac_population"
+#' * \code{\link{calculate_groads}}: "roads", "groads", "sedac_groads"
 #' * \code{\link{calculate_nlcd}}: "nlcd", "NLCD"
 #' * \code{\link{calculate_tri}}: "tri", "TRI"
 #' * \code{\link{calculate_nei}}: "nei", "NEI"
@@ -75,7 +75,7 @@ calculate_covariates <-
 
     # select function to run
     what_to_run <- switch(covariate,
-      modis = calculate_modis_par,
+      modis = calculate_modis,
       ecoregion = calculate_ecoregion,
       ecoregions = calculate_ecoregion,
       koppen = calculate_koppen_geiger,
@@ -83,11 +83,11 @@ calculate_covariates <-
       nlcd = calculate_nlcd,
       smoke = calculate_hms,
       hms = calculate_hms,
-      sedac_groads = calculate_sedac_groads,
-      roads = calculate_sedac_groads,
-      groads = calculate_sedac_groads,
-      sedac_population = calculate_sedac_population,
-      population = calculate_sedac_population,
+      sedac_groads = calculate_groads,
+      roads = calculate_groads,
+      groads = calculate_groads,
+      sedac_population = calculate_population,
+      population = calculate_population,
       nei = calculate_nei,
       tri = calculate_tri,
       geos = calculate_geos,
@@ -285,7 +285,6 @@ calculate_koppen_geiger <-
 #' @param geom FALSE/"sf"/"terra".. Should the function return with geometry?
 #' Default is `FALSE`, options with geometry are "sf" or "terra". The
 #' coordinate reference system of the `sf` or `SpatVector` is that of `from.`
-#' @param nthreads integer(1). Number of threads to be used
 #' @param ... Placeholders.
 #' @note NLCD is available in U.S. only. Users should be aware of
 #' the spatial extent of the data. The results are different depending
@@ -298,19 +297,10 @@ calculate_koppen_geiger <-
 #' @return a data.frame or SpatVector object
 #' @importFrom utils read.csv
 #' @importFrom methods is
-#' @importFrom terra rast
-#' @importFrom terra project
-#' @importFrom terra vect
-#' @importFrom terra crs
-#' @importFrom terra set.crs
-#' @importFrom terra buffer
-#' @importFrom sf st_union
-#' @importFrom sf st_geometry
-#' @importFrom terra intersect
-#' @importFrom terra metags
+#' @importFrom terra rast project vect crs set.crs buffer
+#' @importFrom sf st_union st_geometry
+#' @importFrom terra intersect metags
 #' @importFrom exactextractr exact_extract
-#' @importFrom future plan multicore sequential
-#' @importFrom future.apply future_Map
 #' @importFrom collapse rowbind
 #' @examples
 #' ## NOTE: Example is wrapped in `\dontrun{}` as function requires a large
@@ -326,15 +316,16 @@ calculate_koppen_geiger <-
 #' )
 #' }
 #' @export
-calculate_nlcd <- function(from,
-                      locs,
-                      locs_id = "site_id",
-                      mode = c("exact", "terra"),
-                      radius = 1000,
-                      max_cells = 5e7,
-                      geom = FALSE,
-                      nthreads = 1L,
-                      ...) {
+calculate_nlcd <- function(
+  from,
+  locs,
+  locs_id = "site_id",
+  mode = c("exact", "terra"),
+  radius = 1000,
+  max_cells = 5e7,
+  geom = FALSE,
+  ...
+) {
   # check inputs
   mode <- match.arg(mode)
   if (!is.numeric(radius)) {
@@ -346,12 +337,6 @@ calculate_nlcd <- function(from,
 
   if (!methods::is(from, "SpatRaster")) {
     stop("from is not a SpatRaster.")
-  }
-  if (nthreads > 1L) {
-    stopifnot(Sys.info()["sysname"] != "Windows")
-    future::plan(future::multicore, workers = nthreads)
-  } else {
-    future::plan(future::sequential)
   }
 
   # prepare locations
@@ -378,15 +363,14 @@ calculate_nlcd <- function(from,
     # terra mode
     class_query <- "names"
     # extract land cover class in each buffer
-    nlcd_at_bufs <- future.apply::future_Map(
+    nlcd_at_bufs <- Map(
       function(i) {
         terra::freq(
           from,
           zones = bufs_pol[i, ],
           wide = TRUE
         )
-      }, seq_len(nrow(bufs_pol)),
-      future.seed = TRUE
+      }, seq_len(nrow(bufs_pol))
     )
     nlcd_at_bufs <- collapse::rowbind(nlcd_at_bufs, fill = TRUE)
     nlcd_at_bufs <- nlcd_at_bufs[, -seq(1, 2)]
@@ -399,7 +383,7 @@ calculate_nlcd <- function(from,
     bufs_polx <- bufs_pol[terra::ext(from), ] |>
       sf::st_as_sf()
 
-    nlcd_at_bufs <- future.apply::future_Map(
+    nlcd_at_bufs <- Map(
       function(i) {
         exactextractr::exact_extract(
           from,
@@ -410,8 +394,7 @@ calculate_nlcd <- function(from,
           append_cols = locs_id,
           max_cells_in_memory = max_cells
         )
-      }, seq_len(nrow(bufs_polx)),
-      future.seed = TRUE
+      }, seq_len(nrow(bufs_polx))
     )
     nlcd_at_bufs <- collapse::rowbind(nlcd_at_bufs, fill = TRUE)
     # select only the columns of interest
@@ -450,7 +433,6 @@ calculate_nlcd <- function(from,
     geom = geom,
     crs = terra::crs(from)
   )
-  future::plan(future::sequential)
   return(new_data_vect)
 }
 
@@ -565,171 +547,6 @@ calculate_ecoregion <-
   }
 
 
-#' A single-date MODIS worker for parallelization
-#' @param from SpatRaster. Preprocessed objects.
-#' @param locs SpatVector/sf/sftime object. Locations where MODIS values
-#' are summarized.
-#' @param locs_id character(1). Field name where unique site identifiers
-#' are stored. Default is `"site_id"`
-#' @param radius numeric. Radius to generate circular buffers.
-#' @param date Date(1). date to query.
-#' @param name_extracted character. Names of calculated covariates.
-#' @param fun_summary function. Summary function for
-#' multilayer rasters. Passed to `foo`. See [`exactextractr::exact_extract`]
-#' for details.
-#' @param max_cells integer(1). Maximum number of cells to be read at once.
-#' Higher values will expedite processing, but will increase memory usage.
-#' Maximum possible value is `2^31 - 1`.
-#' @param geom FALSE/"sf"/"terra".. Should the function return with geometry?
-#' Default is `FALSE`, options with geometry are "sf" or "terra". The
-#' coordinate reference system of the `sf` or `SpatVector` is that of `from.`
-#' See [`exactextractr::exact_extract`] for details.
-#' @param ... Placeholders.
-#' @description The function operates at MODIS/VIIRS products
-#' on a daily basis. Given that the raw hdf files are downloaded from
-#' NASA, standard file names include a data retrieval date flag starting
-#' with letter "A". Leveraging that piece of information, the function will
-#' select files of scope on the date of interest.
-#' Please note that this function does not provide a function to filter
-#' swaths or tiles, so it is strongly recommended to check and pre-filter
-#' the file names at users' discretion.
-#' @seealso
-#' * Preprocessing: [process_modis_merge()], [process_modis_swath()],
-#'     [process_blackmarble()]
-#' * Parallelization: [calculate_modis_par()]
-#' @author Insang Song
-#' @return a data.frame or SpatVector object.
-#' @importFrom terra extract
-#' @importFrom terra project
-#' @importFrom terra vect
-#' @importFrom terra nlyr
-#' @importFrom terra describe
-#' @importFrom methods is
-#' @importFrom sf st_as_sf
-#' @importFrom sf st_drop_geometry
-#' @examples
-#' ## NOTE: Example is wrapped in `\dontrun{}` as function requires a large
-#' ##       amount of data which is not included in the package.
-#' \dontrun{
-#' locs <- data.frame(lon = -78.8277, lat = 35.95013, id = "001")
-#' calculate_modis_daily(
-#'   from = mod06l2_warp, # dervied from process_modis() example
-#'   locs = locs,
-#'   locs_id = "id",
-#'   radius = 0,
-#'   date = "2024-01-01",
-#'   name_extracted = "cloud_fraction_0",
-#'   fun_summary = "mean",
-#'   max_cells = 3e7
-#' )
-#' }
-#' @export
-calculate_modis_daily <- function(
-  from = NULL,
-  locs = NULL,
-  locs_id = "site_id",
-  radius = 0L,
-  date = NULL,
-  name_extracted = NULL,
-  fun_summary = "mean",
-  max_cells = 3e7,
-  geom = FALSE,
-  ...
-) {
-  if (!methods::is(locs, "SpatVector")) {
-    locs <- try(terra::vect(locs))
-    if (inherits(locs, "try-error")) {
-      stop("locs should be a SpatVector or convertible object.")
-    }
-  }
-  if (!locs_id %in% names(locs)) {
-    stop(sprintf("locs should include columns named %s.\n",
-                 locs_id))
-  }
-
-  extract_with_buffer <- function(
-    points,
-    surf,
-    radius,
-    id,
-    func = "mean",
-    maxcells = NULL
-  ) {
-    # generate buffers
-    if (radius == 0) radius <- 1e-6 # approximately 1 meter in degree
-    bufs <- terra::buffer(points, width = radius, quadsegs = 180L)
-    bufs <- terra::project(bufs, terra::crs(surf))
-    # extract raster values
-    surf_at_bufs <-
-      exactextractr::exact_extract(
-        x = surf,
-        y = sf::st_as_sf(bufs),
-        fun = func,
-        force_df = TRUE,
-        stack_apply = TRUE,
-        append_cols = id,
-        progress = FALSE,
-        max_cells_in_memory = maxcells
-      )
-    return(surf_at_bufs)
-  }
-
-  ## NaN to NA
-  from[is.nan(from)] <- NA
-
-  # raster used to be vrt_today
-  extracted <-
-    extract_with_buffer(
-      points = locs,
-      surf = from,
-      id = locs_id,
-      radius = radius,
-      func = fun_summary,
-      maxcells = max_cells
-    )
-  # cleaning names
-  # assuming that extracted is a data.frame
-  name_offset <- terra::nlyr(from)
-  # multiple columns will get proper names
-  name_range <- seq(ncol(extracted) - name_offset + 1, ncol(extracted), 1)
-  colnames(extracted)[name_range] <- name_extracted
-  extracted$time <- as.POSIXlt(date)
-  check_geom(geom)
-  if (geom %in% c("sf", "terra")) {
-    # convert to base date, as terra::vect does not like class "POSIXlt"
-    extracted$time <- as.Date.POSIXlt(extracted$time)
-    # location ID with geometry
-    locs_geom_id <- suppressMessages(calc_prepare_locs(
-      from = from,
-      locs = locs,
-      locs_id = locs_id,
-      radius = radius,
-      geom = geom
-    )[[2]]
-    )
-    # merge
-    extracted_merge <- merge(
-      locs_geom_id,
-      extracted,
-      by = locs_id
-    )
-    # re-convert to POSIXlt after creating the vect
-    extracted_merge$time <- as.POSIXlt(extracted_merge$time)
-    extracted_return <- calc_return_locs(
-      covar = extracted_merge,
-      POSIXt = TRUE,
-      geom = geom,
-      crs = terra::crs(from)
-    )
-  } else {
-    calc_check_time(covar = extracted, POSIXt = TRUE)
-    extracted_return <- extracted
-  }
-  gc()
-  return(extracted_return)
-}
-
-
 #' Calculate MODIS product covariates in multiple CPU threads
 #' @param from character. List of paths to MODIS/VIIRS files.
 #' @param locs sf/SpatVector object. Unique locs where covariates
@@ -748,8 +565,6 @@ calculate_modis_daily <- function(
 #' Find detail usage of the argument in notes.
 #' @param fun_summary character or function. Function to summarize
 #'  extracted raster values.
-#' @param nthreads integer(1). Number of threads to be used
-#'  to calculate covariates.
 #' @param package_list_add character. A vector with package names to load
 #'  these in each thread. Note that `sf`, `terra`, `exactextractr`,
 #' `doParallel`, `parallelly` and `dplyr` are the default packages to be
@@ -764,14 +579,13 @@ calculate_modis_daily <- function(
 #' Default is `FALSE`, options with geometry are "sf" or "terra". The
 #' coordinate reference system of the `sf` or `SpatVector` is that of `from.`
 #' @param ... Arguments passed to `preprocess`.
-#' @description `calculate_modis_par` essentially runs [`calculate_modis_daily`] function
+# nolint start
+#' @description `calculate_modis` essentially runs [`calculate_modis_daily`] function
 #' in each thread (subprocess). Based on daily resolution, each day's workload
 #' will be distributed to each thread. With `product` argument,
 #' the files are processed by a customized function where the unique structure
-#' and/or characteristics of the products are considered. `nthreads`
-#' argument should be carefully selected in consideration of the machine's
-#' CPU and memory capacities as products have their own memory pressure.
-#' `locs` should be `sf` object as it is exportable to parallel workers.
+#' and/or characteristics of the products are considered.
+# nolint end
 #' @note Overall, this function and dependent routines assume that the file
 #' system can handle concurrent access to the (network) disk by multiple
 #' processes. File system characteristics, package versions, and hardware
@@ -799,12 +613,7 @@ calculate_modis_daily <- function(
 #' * `attr(., "dates_dropped")`: Dates with insufficient tiles.
 #'   Note that the dates mean the dates with insufficient tiles,
 #'   not the dates without available tiles.
-#' @seealso See details for setting parallelization:
-#' * [`future::plan()`]
-#' * [`future.apply::future_lapply()`]
-#' * [`parallelly::makeClusterPSOCK()`]
-#' * [`parallelly::availableCores()`]
-#'
+#' @seealso
 #' This function leverages the calculation of single-day MODIS
 #' covariates:
 #' * [`calculate_modis_daily()`]
@@ -814,15 +623,10 @@ calculate_modis_daily <- function(
 #' * [`process_modis_swath()`]
 #' * [`process_blackmarble()`]
 #' @importFrom methods is
-#' @importFrom sf st_as_sf
-#' @importFrom sf st_drop_geometry
+#' @importFrom sf st_as_sf st_drop_geometry
 #' @importFrom terra nlyr
-#' @importFrom dplyr bind_rows
-#' @importFrom dplyr left_join
+#' @importFrom dplyr bind_rows left_join
 #' @importFrom rlang inject
-#' @importFrom future plan
-#' @importFrom future cluster
-#' @importFrom future.apply future_lapply
 #' @importFrom parallelly availableWorkers
 #' @examples
 #' ## NOTE: Example is wrapped in `\dontrun{}` as function requires a large
@@ -830,7 +634,7 @@ calculate_modis_daily <- function(
 #' \dontrun{
 #' locs <- data.frame(lon = -78.8277, lat = 35.95013, id = "001")
 #' locs <- terra::vect(locs, geom = c("lon", "lat"), crs = "EPSG:4326")
-#' calculate_modis_par(
+#' calculate_modis(
 #'   from =
 #'     list.files("./data", pattern = "VNP46A2.", full.names = TRUE),
 #'   locs = locs,
@@ -839,12 +643,11 @@ calculate_modis_daily <- function(
 #'   preprocess = process_modis_merge,
 #'   name_covariates = "cloud_fraction_0",
 #'   subdataset = "Cloud_Fraction",
-#'   fun_summary = "mean",
-#'   nthreads = 1
+#'   fun_summary = "mean"
 #' )
 #' }
 #' @export
-calculate_modis_par <-
+calculate_modis <-
   function(
     from = NULL,
     locs = NULL,
@@ -854,7 +657,6 @@ calculate_modis_par <-
     name_covariates = NULL,
     subdataset = NULL,
     fun_summary = "mean",
-    nthreads = floor(length(parallelly::availableWorkers()) / 2),
     package_list_add = NULL,
     export_list_add = NULL,
     max_cells = 3e7,
@@ -910,8 +712,7 @@ process_modis_swath, or process_blackmarble.")
     export_list <- c()
     package_list <-
       c("sf", "terra", "exactextractr", "data.table", "stars",
-        "dplyr", "parallelly", "rlang", "amadeus", "future",
-        "future.apply")
+        "dplyr", "parallelly", "rlang", "amadeus")
     if (!is.null(export_list_add)) {
       export_list <- append(export_list, export_list_add)
     }
@@ -920,17 +721,11 @@ process_modis_swath, or process_blackmarble.")
     }
 
     # make clusters
-    # doParallel::registerDoParallel(cores = nthreads)
-    if (nthreads == 1) {
-      future::plan(future::sequential)
-    } else {
-      future::plan(future::multicore, workers = nthreads)
-    }
     idx_date_available <- seq_along(dates_available)
     list_date_available <-
       split(idx_date_available, idx_date_available)
     calc_results <-
-      future.apply::future_lapply(
+      lapply(
         list_date_available,
         FUN = function(datei) {
           options(sf_use_s2 = FALSE)
@@ -998,8 +793,7 @@ process_modis_swath, or process_blackmarble.")
             res0)
           return(res)
 
-        },
-        future.seed = TRUE
+        }
       )
     calc_results <- do.call(dplyr::bind_rows, calc_results)
     if (geom %in% c("sf", "terra")) {
@@ -1128,9 +922,10 @@ calculate_temporal_dummies <-
 
 # nolint start
 #' Calculate Sum of Exponentially Decaying Contributions (SEDC) covariates
-#' @param from `SpatVector` object. Locations where each SEDC is calculated. 
-#' @param locs `SpatVector` object. Locations where
-#'  the sum of SEDCs are calculated.
+#' @param from `SpatVector`(1). Point locations which contain point-source
+#' covariate data.
+#' @param locs sf/SpatVector(1). Locations where the sum of exponentially
+#' decaying contributions are calculated.
 #' @param locs_id character(1). Name of the unique id field in `point_to`.
 #' @param sedc_bandwidth numeric(1).
 #' Distance at which the source concentration is reduced to
@@ -1515,11 +1310,18 @@ calculate_hms <- function(
     skip_df <- data.frame(as.POSIXlt(from), 0, 0, 0)
     colnames(skip_df) <- c(
       "time",
-      paste0("light_", radius),
-      paste0("medium_", radius),
-      paste0("heavy_", radius)
+      paste0("light_", sprintf("%05d", radius)),
+      paste0("medium_", sprintf("%05d", radius)),
+      paste0("heavy_", sprintf("%05d", radius))
     )
-    skip_merge <- merge(locs, skip_df)
+    # fixed: locs is replicated per the length of from
+    skip_merge <-
+      Reduce(rbind,
+        Map(function(x) {
+          cbind(locs, skip_df[rep(x, nrow(locs)), ])
+        }, seq_len(nrow(skip_df)))
+      )
+
     skip_return <- calc_return_locs(
       skip_merge,
       POSIXt = TRUE,
@@ -1999,7 +1801,7 @@ calculate_geos <- function(
 #' \code{data.frame} object containing \code{locs_id}, year, and population
 #' density variable. Population density variable column name reflects
 #' spatial resolution of \code{from} and circular buffer radius.
-#' @param from SpatRaster(1). Output of \code{process_sedac_population()}.
+#' @param from SpatRaster(1). Output of \code{process_population()}.
 #' @param locs data.frame, characater to file path, SpatVector, or sf object.
 #' @param locs_id character(1). Column within `locations` CSV file
 #' containing identifier for each unique coordinate location.
@@ -2012,7 +1814,7 @@ calculate_geos <- function(
 #' coordinate reference system of the `sf` or `SpatVector` is that of `from.`
 #' @param ... Placeholders
 #' @author Mitchell Manware
-#' @seealso [process_sedac_population()]
+#' @seealso [process_population()]
 #' @return a data.frame or SpatVector object
 #' @importFrom methods is
 #' @examples
@@ -2020,8 +1822,8 @@ calculate_geos <- function(
 #' ##       amount of data which is not included in the package.
 #' \dontrun{
 #' loc <- data.frame(id = "001", lon = -78.90, lat = 35.97)
-#' calculate_sedac_population(
-#'   from = pop, # derived from process_sedac_population() example
+#' calculate_population(
+#'   from = pop, # derived from process_population() example
 #'   locs = loc,
 #'   locs_id = "id",
 #'   radius = 0,
@@ -2030,7 +1832,7 @@ calculate_geos <- function(
 #' )
 #' }
 #' @export
-calculate_sedac_population <- function(
+calculate_population <- function(
     from,
     locs,
     locs_id = NULL,
@@ -2101,7 +1903,7 @@ calculate_sedac_population <- function(
 #' Then the density of the roads is calculated by dividing
 #' the total length from the area of the buffer. `terra::linearUnits()`
 #' is used to convert the unit of length to meters.
-#' @param from SpatVector(1). Output of `process_sedac_groads`.
+#' @param from SpatVector(1). Output of `process_groads`.
 #' @param locs data.frame, characater to file path, SpatVector, or sf object.
 #' @param locs_id character(1). Column within `locations` CSV file
 #' containing identifier for each unique coordinate location.
@@ -2119,7 +1921,7 @@ calculate_sedac_population <- function(
 #' dataset. For more information, see <https://earthdata.nasa.gov/data/catalog/sedac-ciesin-sedac-groads-v1-1.00>.
 # nolint end
 #' @author Insang Song
-#' @seealso [`process_sedac_groads`]
+#' @seealso [`process_groads`]
 #' @return a data.frame or SpatVector object
 #' @importFrom terra vect
 #' @importFrom stats aggregate
@@ -2137,8 +1939,8 @@ calculate_sedac_population <- function(
 #' ##       amount of data which is not included in the package.
 #' \dontrun{
 #' loc <- data.frame(id = "001", lon = -78.90, lat = 35.97)
-#' calculate_sedac_groads(
-#'   from = groads, # derived from process_sedac_groads() example
+#' calculate_groads(
+#'   from = groads, # derived from process_groads() example
 #'   locs = loc,
 #'   locs_id = "id",
 #'   radius = 1000,
@@ -2147,7 +1949,7 @@ calculate_sedac_population <- function(
 #' )
 #' }
 #' @export
-calculate_sedac_groads <- function(
+calculate_groads <- function(
     from = NULL,
     locs = NULL,
     locs_id = NULL,
