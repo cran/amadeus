@@ -1,6 +1,6 @@
 Package: amadeus
 Title: Accessing and Analyzing Large-Scale Environmental Data
-Version: 1.2.2
+Version: 1.2.3
 Authors@R: c(
     person(given = "Mitchell", family = "Manware", role = c("aut", "ctb"), comment = c(ORCID = "0009-0003-6440-6106")),
     person(given = "Insang", family = "Song", role = c("aut", "ctb"), comment = c(ORCID = "0000-0001-8732-3256")),
@@ -15,8 +15,7 @@ Description: Functions are designed to facilitate access to and utility with lar
 Depends: R (>= 4.1.0)
 Imports: dplyr, sf, sftime, stats, terra, methods, data.table, httr,
         rvest, exactextractr, utils, stringi, testthat (>= 3.0.0),
-        parallelly, stars, tidyr, rlang, nhdplusTools, archive,
-        collapse, Rdpack
+        stars, tidyr, rlang, nhdplusTools, archive, collapse, Rdpack
 Suggests: covr, withr, knitr, rmarkdown, lwgeom, FNN, doRNG, devtools,
         stringr, tigris, spelling
 RdMacros: Rdpack
@@ -30,7 +29,7 @@ URL: https://niehs.github.io/amadeus/
 BugReports: https://github.com/NIEHS/amadeus/issues
 Language: en-US
 NeedsCompilation: no
-Packaged: 2025-01-07 14:38:45 UTC; manwareme
+Packaged: 2025-01-16 18:06:13 UTC; manwareme
 Author: Mitchell Manware [aut, ctb] (<https://orcid.org/0009-0003-6440-6106>),
   Insang Song [aut, ctb] (<https://orcid.org/0000-0001-8732-3256>),
   Eva Marques [aut, ctb] (<https://orcid.org/0000-0001-9817-6546>),
@@ -40,4 +39,4 @@ Author: Mitchell Manware [aut, ctb] (<https://orcid.org/0009-0003-6440-6106>),
   Kyle Messier [aut, cre] (<https://orcid.org/0000-0001-9508-9623>),
   Spatiotemporal Exposures and Toxicology Group [cph]
 Repository: CRAN
-Date/Publication: 2025-01-08 09:10:02 UTC
+Date/Publication: 2025-01-16 22:00:06 UTC
