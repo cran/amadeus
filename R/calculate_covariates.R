@@ -53,20 +53,40 @@
 # nolint end
 calculate_covariates <-
   function(
-      covariate = c("modis", "koppen-geiger",
-                    "koeppen-geiger", "koppen", "koeppen",
-                    "geos", "dummies", "gmted",
-                    "sedac_groads", "groads", "roads",
-                    "ecoregions", "ecoregion", "hms", "smoke",
-                    "gmted", "narr", "geos",
-                    "sedac_population", "population", "nlcd",
-                    "merra", "merra2", "gridmet", "terraclimate",
-                    "tri", "nei"),
-      from,
-      locs,
-      locs_id = "site_id",
-      ...) {
-
+    covariate = c(
+      "modis",
+      "koppen-geiger",
+      "koeppen-geiger",
+      "koppen",
+      "koeppen",
+      "geos",
+      "dummies",
+      "gmted",
+      "sedac_groads",
+      "groads",
+      "roads",
+      "ecoregions",
+      "ecoregion",
+      "hms",
+      "smoke",
+      "gmted",
+      "narr",
+      "geos",
+      "sedac_population",
+      "population",
+      "nlcd",
+      "merra",
+      "merra2",
+      "gridmet",
+      "terraclimate",
+      "tri",
+      "nei"
+    ),
+    from,
+    locs,
+    locs_id = "site_id",
+    ...
+  ) {
     covariate <- tolower(covariate)
     covariate <- match.arg(covariate)
     if (startsWith(covariate, "ko")) {
@@ -74,51 +94,55 @@ calculate_covariates <-
     }
 
     # select function to run
-    what_to_run <- switch(covariate,
-      modis = calculate_modis,
-      ecoregion = calculate_ecoregion,
-      ecoregions = calculate_ecoregion,
-      koppen = calculate_koppen_geiger,
-      narr = calculate_narr,
-      nlcd = calculate_nlcd,
-      smoke = calculate_hms,
-      hms = calculate_hms,
-      sedac_groads = calculate_groads,
-      roads = calculate_groads,
-      groads = calculate_groads,
-      sedac_population = calculate_population,
-      population = calculate_population,
-      nei = calculate_nei,
-      tri = calculate_tri,
-      geos = calculate_geos,
-      gmted = calculate_gmted,
-      dummies = calculate_temporal_dummies,
-      merra = calculate_merra2,
-      merra2 = calculate_merra2,
-      gridmet = calculate_gridmet,
-      terraclimate = calculate_terraclimate
+    what_to_run <- switch(
+      covariate,
+      modis = amadeus::calculate_modis,
+      ecoregion = amadeus::calculate_ecoregion,
+      ecoregions = amadeus::calculate_ecoregion,
+      koppen = amadeus::calculate_koppen_geiger,
+      narr = amadeus::calculate_narr,
+      nlcd = amadeus::calculate_nlcd,
+      smoke = amadeus::calculate_hms,
+      hms = amadeus::calculate_hms,
+      sedac_groads = amadeus::calculate_groads,
+      roads = amadeus::calculate_groads,
+      groads = amadeus::calculate_groads,
+      sedac_population = amadeus::calculate_population,
+      population = amadeus::calculate_population,
+      nei = amadeus::calculate_nei,
+      tri = amadeus::calculate_tri,
+      geos = amadeus::calculate_geos,
+      gmted = amadeus::calculate_gmted,
+      dummies = amadeus::calculate_temporal_dummies,
+      merra = amadeus::calculate_merra2,
+      merra2 = amadeus::calculate_merra2,
+      gridmet = amadeus::calculate_gridmet,
+      terraclimate = amadeus::calculate_terraclimate
     )
 
     res_covariate <-
-      tryCatch({
-        what_to_run(
-          from = from,
-          locs = locs,
-          locs_id = locs_id,
-          ...
-        )
-      }, error = function(e) {
-        stop(
-          paste0(
-            e,
-            "\n",
-            paste0(deparse(args(what_to_run)), collapse = "\n"),
-            "\n",
-            "Please refer to the argument list and ",
-            "the error message above to rectify the error.\n"
+      tryCatch(
+        {
+          what_to_run(
+            from = from,
+            locs = locs,
+            locs_id = locs_id,
+            ...
           )
-        )
-      })
+        },
+        error = function(e) {
+          stop(
+            paste0(
+              e,
+              "\n",
+              paste0(deparse(args(what_to_run)), collapse = "\n"),
+              "\n",
+              "Please refer to the argument list and ",
+              "the error message above to rectify the error.\n"
+            )
+          )
+        }
+      )
 
     return(res_covariate)
   }
@@ -169,13 +193,14 @@ calculate_covariates <-
 # locs (locs), from (from), locs_id (id_col), variables
 calculate_koppen_geiger <-
   function(
-      from = NULL,
-      locs = NULL,
-      locs_id = "site_id",
-      geom = FALSE,
-      ...) {
+    from = NULL,
+    locs = NULL,
+    locs_id = "site_id",
+    geom = FALSE,
+    ...
+  ) {
     # prepare locations
-    locs_prepared <- calc_prepare_locs(
+    locs_prepared <- amadeus::calc_prepare_locs(
       from = from,
       locs = locs,
       locs_id = locs_id,
@@ -189,10 +214,37 @@ calculate_koppen_geiger <-
     # The starting value is NA as the color table has 0 value in it
     kg_class <-
       c(
-        NA, "Af", "Am", "Aw", "BWh", "BWk", "BSh", "BSk", "Csa", "Csb",
-        "Csc", "Cwa", "Cwb", "Cwc", "Cfa", "Cfb", "Cfc",
-        "Dsa", "Dsb", "Dsc", "Dsd", "Dwa", "Dwb", "Dwc", "Dwd",
-        "Dfa", "Dfb", "Dfc", "Dfd", "ET", "EF"
+        NA,
+        "Af",
+        "Am",
+        "Aw",
+        "BWh",
+        "BWk",
+        "BSh",
+        "BSk",
+        "Csa",
+        "Csb",
+        "Csc",
+        "Cwa",
+        "Cwb",
+        "Cwc",
+        "Cfa",
+        "Cfb",
+        "Cfc",
+        "Dsa",
+        "Dsb",
+        "Dsc",
+        "Dsd",
+        "Dwa",
+        "Dwb",
+        "Dwc",
+        "Dwd",
+        "Dfa",
+        "Dfb",
+        "Dfc",
+        "Dfd",
+        "ET",
+        "EF"
       )
     kg_coltab <- terra::coltab(from)
     kg_coltab <- kg_coltab[[1]][seq(1, 31), ]
@@ -243,13 +295,13 @@ calculate_koppen_geiger <-
     kg_extracted <-
       cbind(
         locs_id = locs_df,
-        as.character(terra::metags(from)),
+        as.character(terra::metags(from)$value[2]),
         df_ae_separated
       )
     names(kg_extracted)[1] <- locs_id
     if (geom %in% c("sf", "terra")) {
       names(kg_extracted)[2:3] <- c("geometry", "description")
-      sites_return <- calc_return_locs(
+      sites_return <- amadeus::calc_return_locs(
         covar = kg_extracted,
         POSIXt = FALSE,
         geom = geom,
@@ -338,6 +390,16 @@ calculate_nlcd <- function(
     stop("from is not a SpatRaster.")
   }
 
+  # currently only handles 1 year
+  if (terra::nlyr(from) > 1) {
+    stop(
+      paste0(
+        "`from` contains more than one data layer. Current version ",
+        "only processes one year worth of NLCD data."
+      )
+    )
+  }
+
   # prepare locations
   locs_prepared <- amadeus::calc_prepare_locs(
     from = from,
@@ -349,19 +411,34 @@ calculate_nlcd <- function(
   locs_vector <- locs_prepared[[1]]
   locs_df <- locs_prepared[[2]]
 
-  year <- try(as.integer(terra::metags(from, name = "year")))
+  # detect new or deprecated file path stucture
+  if (names(from) == "NLCD Land Cover Class") {
+    message(
+      paste0(
+        "Deprecated data format detected. Data still analyzed, but ",
+        "see https://www.mrlc.gov/data/project/annual-nlcd for updated ",
+        "NLCD documentation and availability."
+      )
+    )
+  }
+  year <- as.integer(terra::metags(from)[2, 2])
+  stopifnot(year %in% 1985:2023L)
+
   # select points within mainland US and reproject on nlcd crs if necessary
   data_vect_b <-
     terra::project(locs_vector, y = terra::crs(from))
   cfpath <- system.file("extdata", "nlcd_classes.csv", package = "amadeus")
   nlcd_classes <- utils::read.csv(cfpath)
 
-  if (radius <= 0 && terra::geomtype(locs) == "points") {
-    message(
-      paste0(
-        "Calculating NLCD Land Cover Class covariates for ", year, "..."
-      )
+  message(
+    paste0(
+      "Calculating NLCD Land Cover Class covariates for ",
+      year,
+      "..."
     )
+  )
+
+  if (radius <= 0 && terra::geomtype(locs) == "points") {
     new_data_vect <- suppressMessages(
       amadeus::calc_worker(
         dataset = "nlcd",
@@ -370,22 +447,23 @@ calculate_nlcd <- function(
         locs_df = locs_df,
         fun = "mean",
         variable = 1,
-        time = 2,
+        time = 4,
         time_type = "year",
         radius = 0,
         level = NULL
       )
     )
     new_data_vect$time <- year
-    names(new_data_vect)[grep("NLCD", names(new_data_vect))] <- sprintf(
-      "LDU_0_%05d", radius
+    names(new_data_vect)[grep("Annual", names(new_data_vect))] <- sprintf(
+      "LDU_0_%05d",
+      radius
     )
   } else {
     # create circle buffers with buf_radius
     bufs_pol <- terra::buffer(data_vect_b, width = radius)
     if (mode == "terra") {
       # terra mode
-      class_query <- "names"
+      # class_query <- "names"
       # extract land cover class in each buffer
       nlcd_at_bufs <- Map(
         function(i) {
@@ -394,15 +472,20 @@ calculate_nlcd <- function(
             zones = bufs_pol[i, ],
             wide = TRUE
           )
-        }, seq_len(nrow(bufs_pol))
+        },
+        seq_len(nrow(bufs_pol))
       )
-      nlcd_at_bufs <- collapse::rowbind(nlcd_at_bufs, fill = TRUE)
-      nlcd_at_bufs <- nlcd_at_bufs[, -seq(1, 2)]
-      nlcd_cellcnt <- nlcd_at_bufs[, seq(1, ncol(nlcd_at_bufs), 1)]
+      nlcd_at_bufs_fill <- amadeus::collapse_nlcd(
+        data = nlcd_at_bufs,
+        mode = mode,
+        locs_id = locs_id
+      )
+      nlcd_at_bufs_fill <- nlcd_at_bufs_fill[, -seq(1, 2)]
+      nlcd_cellcnt <- nlcd_at_bufs_fill[, seq(1, ncol(nlcd_at_bufs_fill), 1)]
       nlcd_cellcnt <- nlcd_cellcnt / rowSums(nlcd_cellcnt, na.rm = TRUE)
-      nlcd_at_bufs[, seq(1, ncol(nlcd_at_bufs), 1)] <- nlcd_cellcnt
+      nlcd_at_bufs_fill[, seq(1, ncol(nlcd_at_bufs_fill), 1)] <- nlcd_cellcnt
     } else {
-      class_query <- "value"
+      # class_query <- "value"
       # ratio of each nlcd class per buffer
       bufs_polx <- bufs_pol[terra::ext(from), ] |>
         sf::st_as_sf()
@@ -418,19 +501,26 @@ calculate_nlcd <- function(
             append_cols = locs_id,
             max_cells_in_memory = max_cells
           )
-        }, seq_len(nrow(bufs_polx))
+        },
+        seq_len(nrow(bufs_polx))
       )
-      nlcd_at_bufs <- collapse::rowbind(nlcd_at_bufs, fill = TRUE)
+      nlcd_at_bufs_fill <- amadeus::collapse_nlcd(
+        data = nlcd_at_bufs,
+        mode = mode,
+        locs = bufs_pol,
+        locs_id = locs_id
+      )
       # select only the columns of interest
-      nlcd_at_buf_names <- names(nlcd_at_bufs)
+      nlcd_at_buf_names <- names(nlcd_at_bufs_fill)
       nlcd_val_cols <-
         grep("^frac_", nlcd_at_buf_names)
-      nlcd_at_bufs <- nlcd_at_bufs[, nlcd_val_cols]
+      nlcd_at_bufs_fill <- nlcd_at_bufs_fill[, nlcd_val_cols]
     }
+
     # fill NAs
-    nlcd_at_bufs[is.na(nlcd_at_bufs)] <- 0
+    nlcd_at_bufs_fill[is.na(nlcd_at_bufs_fill)] <- 0
     # change column names
-    nlcd_names <- names(nlcd_at_bufs)
+    nlcd_names <- names(nlcd_at_bufs_fill)
     nlcd_names <- sub(pattern = "frac_", replacement = "", x = nlcd_names)
     nlcd_names <-
       switch(
@@ -439,11 +529,12 @@ calculate_nlcd <- function(
         terra = nlcd_names
       )
     nlcd_names <-
-      nlcd_classes$class[match(nlcd_names, nlcd_classes[[class_query]])]
+      nlcd_classes$class[match(nlcd_names, nlcd_classes$value)]
     new_names <- sprintf("LDU_%s_0_%05d", nlcd_names, radius)
-    names(nlcd_at_bufs) <- new_names
+    names(nlcd_at_bufs_fill) <- new_names
+
     # merge locs_df with nlcd class fractions
-    new_data_vect <- cbind(locs_df, as.integer(year), nlcd_at_bufs)
+    new_data_vect <- cbind(locs_df, as.integer(year), nlcd_at_bufs_fill)
   }
 
   if (geom %in% c("sf", "terra")) {
@@ -505,7 +596,7 @@ calculate_ecoregion <-
     ...
   ) {
     # prepare locations
-    locs_prepared <- calc_prepare_locs(
+    locs_prepared <- amadeus::calc_prepare_locs(
       from = from,
       locs = locs,
       locs_id = locs_id,
@@ -553,11 +644,28 @@ calculate_ecoregion <-
     colnames(df_lv3) <- key3_num_unique
 
     locs_ecoreg <- cbind(
-      locs_df,
+      locs_df[(locs_df[, 1] %in% extracted[[locs_id]][, 1]), ],
       paste0("1997 - ", data.table::year(Sys.Date())),
-      df_lv2, df_lv3
+      df_lv2,
+      df_lv3
     )
-    locs_return <- calc_return_locs(
+    colnames(locs_ecoreg)[1] <- locs_id
+
+    # Catch and patch for sites with no matching ecoregions
+    if (nrow(locs_ecoreg) != nrow(locs)) {
+      message(
+        "Warning: only ",
+        nrow(locs_ecoreg),
+        " of the ",
+        nrow(locs),
+        " locations provided had matching ecoregions. ",
+        nrow(locs) - nrow(locs_ecoreg),
+        " unmatched locations will present NAs."
+      )
+      # Introduce missing sites back to dataframe
+      locs_ecoreg <- merge(locs_df, locs_ecoreg, by = locs_id, all.x = TRUE)
+    }
+    locs_return <- amadeus::calc_return_locs(
       covar = locs_ecoreg,
       POSIXt = FALSE,
       geom = geom,
@@ -601,6 +709,12 @@ calculate_ecoregion <-
 #' @param geom FALSE/"sf"/"terra".. Should the function return with geometry?
 #' Default is `FALSE`, options with geometry are "sf" or "terra". The
 #' coordinate reference system of the `sf` or `SpatVector` is that of `from.`
+#' @param scale character(1). Scale expression to be applied to the raw values.
+#' It is crucial that users review the technical documentatio of the MODIS product
+#' they are using to ensure proper scale.
+#' An example for the MOD11A1 product's LST_Day_1km variable (land surface temperature)
+#' would be `scale = "* 0.02"`.
+#' Default is `NULL`, which applies no scale.
 #' @param ... Arguments passed to `preprocess`.
 # nolint start
 #' @description `calculate_modis` essentially runs [`calculate_modis_daily`] function
@@ -675,7 +789,7 @@ calculate_modis <-
     locs = NULL,
     locs_id = "site_id",
     radius = c(0L, 1e3L, 1e4L, 5e4L),
-    preprocess = process_modis_merge,
+    preprocess = amadeus::process_modis_merge,
     name_covariates = NULL,
     subdataset = NULL,
     fun_summary = "mean",
@@ -683,12 +797,27 @@ calculate_modis <-
     export_list_add = NULL,
     max_cells = 3e7,
     geom = FALSE,
+    scale = NULL,
     ...
   ) {
-    check_geom(geom)
+    amadeus::check_geom(geom)
     if (!is.function(preprocess)) {
-      stop("preprocess should be one of process_modis_merge,
-process_modis_swath, or process_blackmarble.")
+      stop(
+        "preprocess should be one of process_modis_merge,
+process_modis_swath, or process_blackmarble."
+      )
+    }
+    if (!is.null(scale)) {
+      stopifnot(is.character(scale))
+    }
+    if (is.null(scale)) {
+      warning(
+        paste0(
+          "`scale` parameter not defined. Review technical documentation ",
+          "to apply proper scale. Calculation proceeding with unscaled values."
+        )
+      )
+      scale <- "* 1"
     }
     # read all arguments
     # nolint start
@@ -727,14 +856,25 @@ process_modis_swath, or process_blackmarble.")
 
     locs_input <- try(sf::st_as_sf(locs), silent = TRUE)
     if (inherits(locs_input, "try-error")) {
-      stop("locs cannot be convertible to sf.
-      Please convert locs into a sf object to proceed.\n")
+      stop(
+        "locs cannot be convertible to sf.
+      Please convert locs into a sf object to proceed.\n"
+      )
     }
 
     export_list <- c()
     package_list <-
-      c("sf", "terra", "exactextractr", "data.table", "stars",
-        "dplyr", "parallelly", "rlang", "amadeus")
+      c(
+        "sf",
+        "terra",
+        "exactextractr",
+        "data.table",
+        "stars",
+        "dplyr",
+        "parallelly",
+        "rlang",
+        "amadeus"
+      )
     if (!is.null(export_list_add)) {
       export_list <- append(export_list, export_list_add)
     }
@@ -766,62 +906,62 @@ process_modis_swath, or process_blackmarble.")
             rlang::inject(preprocess(!!!hdf_args))
 
           if (sum(terra::nlyr(vrt_today)) != length(name_covariates)) {
-            message("The number of layers in the input raster do not match
-                    the length of name_covariates.\n")
+            message(
+              "The number of layers in the input raster do not match
+                    the length of name_covariates.\n"
+            )
           }
 
           res0 <-
-            lapply(radiusindexlist,
-              function(k) {
-                name_radius <-
-                  sprintf("%s%05d",
-                          name_covariates,
-                          radius[k])
-                extracted <-
-                  try(
-                    calculate_modis_daily(
-                      locs = locs_input,
-                      from = vrt_today,
-                      locs_id = locs_id,
-                      date = as.character(day_to_pick),
-                      fun_summary = fun_summary,
-                      name_extracted = name_radius,
-                      radius = radius[k],
-                      max_cells = max_cells,
-                      geom = FALSE
-                    )
+            lapply(radiusindexlist, function(k) {
+              name_radius <-
+                sprintf("%s%05d", name_covariates, radius[k])
+              extracted <-
+                try(
+                  amadeus::calculate_modis_daily(
+                    locs = locs_input,
+                    from = vrt_today,
+                    locs_id = locs_id,
+                    date = as.character(day_to_pick),
+                    fun_summary = fun_summary,
+                    name_extracted = name_radius,
+                    radius = radius[k],
+                    max_cells = max_cells,
+                    geom = FALSE,
+                    scale = scale
                   )
-                if (inherits(extracted, "try-error")) {
-                  # coerce to avoid errors
-                  error_df <- data.frame(
-                    matrix(-99999,
-                           ncol = length(name_radius) + 1,
-                           nrow = nrow(locs_input))
+                )
+              if (inherits(extracted, "try-error")) {
+                # coerce to avoid errors
+                error_df <- data.frame(
+                  matrix(
+                    -99999,
+                    ncol = length(name_radius) + 1,
+                    nrow = nrow(locs_input)
                   )
-                  error_df <- stats::setNames(error_df, c(locs_id, name_radius))
-                  error_df[[locs_id]] <- unlist(locs_input[[locs_id]])
-                  error_df$time <- day_to_pick
-                  extracted <- error_df
-                }
-                return(extracted)
+                )
+                error_df <- stats::setNames(error_df, c(locs_id, name_radius))
+                error_df[[locs_id]] <- unlist(locs_input[[locs_id]])
+                error_df$time <- day_to_pick
+                extracted <- error_df
               }
-            )
+              return(extracted)
+            })
           res <-
-            Reduce(function(x, y) {
-              dplyr::left_join(x, y,
-                by = c(locs_id, "time")
-              )
-            },
-            res0)
+            Reduce(
+              function(x, y) {
+                dplyr::left_join(x, y, by = c(locs_id, "time"))
+              },
+              res0
+            )
           return(res)
-
         }
       )
     calc_results <- do.call(dplyr::bind_rows, calc_results)
     if (geom %in% c("sf", "terra")) {
       # merge
       calc_results_return <- merge(
-        locs_input,
+        locs_input[, locs_id],
         calc_results,
         by = locs_id
       )
@@ -877,7 +1017,7 @@ calculate_temporal_dummies <-
     geom = FALSE,
     ...
   ) {
-    check_geom(geom)
+    amadeus::check_geom(geom)
     if (!methods::is(locs, "data.frame")) {
       stop("Argument locs is not a data.frame.\n")
     }
@@ -888,16 +1028,15 @@ calculate_temporal_dummies <-
       vec_unique <- domain
       vec_split <- split(vec_unique, vec_unique)
       vec_assigned <-
-        lapply(vec_split,
-               function(x) {
-                 as.integer(vec == x)
-               })
+        lapply(vec_split, function(x) {
+          as.integer(vec == x)
+        })
       dt_dum <- Reduce(cbind, vec_assigned)
       dt_dum <- data.table::as.data.table(dt_dum)
       return(dt_dum)
     }
 
-    calc_check_time(covar = locs, POSIXt = TRUE)
+    amadeus::calc_check_time(covar = locs, POSIXt = TRUE)
     # year
     vec_year <- data.table::year(locs$time)
     dt_year_dum <- dummify(vec_year, year)
@@ -909,9 +1048,20 @@ calculate_temporal_dummies <-
     vec_month <- data.table::month(locs$time)
     dt_month_dum <- dummify(vec_month, seq(1L, 12L))
     shortmn <-
-      c("JANUA", "FEBRU", "MARCH", "APRIL",
-        "MAYMA", "JUNEJ", "JULYJ", "AUGUS",
-        "SEPTE", "OCTOB", "NOVEM", "DECEM")
+      c(
+        "JANUA",
+        "FEBRU",
+        "MARCH",
+        "APRIL",
+        "MAYMA",
+        "JUNEJ",
+        "JULYJ",
+        "AUGUS",
+        "SEPTE",
+        "OCTOB",
+        "NOVEM",
+        "DECEM"
+      )
     colnames(dt_month_dum) <-
       sprintf("DUM_%s_0_00000", shortmn)
 
@@ -932,7 +1082,7 @@ calculate_temporal_dummies <-
       )
 
     # geom
-    locs_return <- calc_return_locs(
+    locs_return <- amadeus::calc_return_locs(
       covar = locs_dums,
       POSIXt = TRUE,
       geom = geom,
@@ -972,7 +1122,7 @@ calculate_temporal_dummies <-
 #' @author Insang Song
 #' @references
 #' \insertRef{messier2012integrating}{amadeus}
-#' 
+#'
 #' \insertRef{web_sedctutorial_package}{amadeus}
 #' @examples
 #' set.seed(101)
@@ -1012,7 +1162,7 @@ sum_edc <-
     target_fields = NULL,
     geom = FALSE
   ) {
-    check_geom(geom)
+    amadeus::check_geom(geom)
     if (!methods::is(locs, "SpatVector")) {
       locs <- try(terra::vect(locs))
     }
@@ -1076,7 +1226,7 @@ The result may not be accurate.\n",
       dplyr::summarize(
         dplyr::across(
           dplyr::all_of(target_fields),
-          ~sum(w_sedc * ., na.rm = TRUE)
+          ~ sum(w_sedc * ., na.rm = TRUE)
         )
       ) |>
       dplyr::ungroup()
@@ -1092,7 +1242,7 @@ The result may not be accurate.\n",
       )
     }
 
-    res_sedc_return <- calc_return_locs(
+    res_sedc_return <- amadeus::calc_return_locs(
       covar = res_sedc,
       POSIXt = TRUE,
       geom = geom,
@@ -1104,8 +1254,6 @@ The result may not be accurate.\n",
 
     return(res_sedc_return)
   }
-
-
 
 
 #' Calculate toxic release covariates
@@ -1163,7 +1311,7 @@ calculate_tri <- function(
   geom = FALSE,
   ...
 ) {
-  check_geom(geom)
+  amadeus::check_geom(geom)
   if (!methods::is(locs, "SpatVector")) {
     if (methods::is(locs, "sf")) {
       locs <- terra::vect(locs)
@@ -1204,7 +1352,7 @@ calculate_tri <- function(
     df_tri <- dplyr::left_join(as.data.frame(locs), df_tri)
   }
 
-  df_tri_return <- calc_return_locs(
+  df_tri_return <- amadeus::calc_return_locs(
     covar = df_tri,
     POSIXt = FALSE,
     geom = geom,
@@ -1253,7 +1401,7 @@ calculate_nei <- function(
   geom = FALSE,
   ...
 ) {
-  check_geom(geom)
+  amadeus::check_geom(geom)
   if (!methods::is(locs, "SpatVector")) {
     locs <- try(terra::vect(locs))
     if (inherits(locs, "try-error")) {
@@ -1265,7 +1413,7 @@ calculate_nei <- function(
   locs_re <- terra::intersect(locs_re, from)
   locs_re <- as.data.frame(locs_re)
 
-  locs_return <- calc_return_locs(
+  locs_return <- amadeus::calc_return_locs(
     covar = locs_re,
     POSIXt = FALSE,
     geom = geom,
@@ -1273,7 +1421,6 @@ calculate_nei <- function(
   )
   return(locs_return)
 }
-
 
 
 #' Calculate wildfire smoke covariates
@@ -1314,18 +1461,19 @@ calculate_nei <- function(
 #' }
 #' @export
 calculate_hms <- function(
-    from,
-    locs,
-    locs_id = NULL,
-    radius = 0,
-    geom = FALSE,
-    ...) {
+  from,
+  locs,
+  locs_id = NULL,
+  radius = 0,
+  geom = FALSE,
+  ...
+) {
   #### check for null parameters
-  check_for_null_parameters(mget(ls()))
+  amadeus::check_for_null_parameters(mget(ls()))
   #### from == character indicates no wildfire smoke plumes are present
   #### return 0 for all densities, locs and dates
   if (is.character(from)) {
-    check_geom(geom)
+    amadeus::check_geom(geom)
     message(paste0(
       "Inherited list of dates due to absent smoke plume polygons.\n"
     ))
@@ -1338,13 +1486,17 @@ calculate_hms <- function(
     )
     # fixed: locs is replicated per the length of from
     skip_merge <-
-      Reduce(rbind,
-        Map(function(x) {
-          cbind(locs, skip_df[rep(x, nrow(locs)), ])
-        }, seq_len(nrow(skip_df)))
+      Reduce(
+        rbind,
+        Map(
+          function(x) {
+            cbind(locs, skip_df[rep(x, nrow(locs)), ])
+          },
+          seq_len(nrow(skip_df))
+        )
       )
 
-    skip_return <- calc_return_locs(
+    skip_return <- amadeus::calc_return_locs(
       skip_merge,
       POSIXt = TRUE,
       geom = geom,
@@ -1353,7 +1505,7 @@ calculate_hms <- function(
     return(skip_return)
   }
   #### prepare locations list
-  sites_list <- calc_prepare_locs(
+  sites_list <- amadeus::calc_prepare_locs(
     from = from,
     locs = locs,
     locs_id = locs_id,
@@ -1364,7 +1516,7 @@ calculate_hms <- function(
   sites_id <- sites_list[[2]]
 
   #### generate date sequence for missing polygon patch
-  date_sequence <- generate_date_sequence(
+  date_sequence <- amadeus::generate_date_sequence(
     date_start = as.Date(
       from$Date[1],
       format = "%Y%m%d"
@@ -1467,9 +1619,7 @@ calculate_hms <- function(
   colname_common <- c(locs_id, "time", binary_colname)
   if (geom %in% c("sf", "terra")) {
     sites_extracted <-
-      merge(sites_extracted,
-            sites_id,
-            by = locs_id)
+      merge(sites_extracted, sites_id, by = locs_id)
     sites_extracted <-
       stats::setNames(
         sites_extracted,
@@ -1503,7 +1653,7 @@ calculate_hms <- function(
     sites_extracted[order(sites_extracted$time), ]
   )
   message("Returning smoke intensity covariates.")
-  sites_extracted_ordered <- calc_return_locs(
+  sites_extracted_ordered <- amadeus::calc_return_locs(
     covar = sites_extracted,
     POSIXt = TRUE,
     geom = geom,
@@ -1558,15 +1708,16 @@ calculate_hms <- function(
 #' }
 #' @export
 calculate_gmted <- function(
-    from,
-    locs,
-    locs_id = NULL,
-    radius = 0,
-    fun = "mean",
-    geom = FALSE,
-    ...) {
+  from,
+  locs,
+  locs_id = NULL,
+  radius = 0,
+  fun = "mean",
+  geom = FALSE,
+  ...
+) {
   #### prepare locations list
-  sites_list <- calc_prepare_locs(
+  sites_list <- amadeus::calc_prepare_locs(
     from = from,
     locs = locs,
     locs_id = locs_id,
@@ -1576,7 +1727,7 @@ calculate_gmted <- function(
   sites_e <- sites_list[[1]]
   sites_id <- sites_list[[2]]
   #### perform extraction
-  sites_extracted <- calc_worker(
+  sites_extracted <- amadeus::calc_worker(
     dataset = "gmted",
     from = from,
     locs_vector = sites_e,
@@ -1590,16 +1741,20 @@ calculate_gmted <- function(
   #### variable column name
   statistic_codes <- c("be", "ds", "md", "mi", "mn", "mx", "sd")
   statistic_to <- c(
-    "BRK", "SUB", "MED", "MEA", "MIN", "MAX", "STD"
+    "BRK",
+    "SUB",
+    "MED",
+    "MEA",
+    "MIN",
+    "MAX",
+    "STD"
   )
   name_from <- names(from)
   code_unique <-
     regmatches(
       name_from,
       regexpr(
-        paste0("(",
-               paste(statistic_codes, collapse = "|"),
-               ")[0-9]{2,2}"),
+        paste0("(", paste(statistic_codes, collapse = "|"), ")[0-9]{2,2}"),
         name_from
       )
     )
@@ -1626,7 +1781,7 @@ calculate_gmted <- function(
     sites_extracted[, 3] <- as.numeric(sites_extracted[, 3])
     names(sites_extracted) <- c(locs_id, "time", variable_name)
   }
-  sites_return <- calc_return_locs(
+  sites_return <- amadeus::calc_return_locs(
     covar = sites_extracted,
     POSIXt = FALSE,
     geom = geom,
@@ -1635,7 +1790,6 @@ calculate_gmted <- function(
   #### return data.frame
   return(sites_return)
 }
-
 
 
 #' Calculate meteorological covariates
@@ -1681,15 +1835,16 @@ calculate_gmted <- function(
 #' }
 #' @export
 calculate_narr <- function(
-    from,
-    locs,
-    locs_id = NULL,
-    radius = 0,
-    fun = "mean",
-    geom = FALSE,
-    ...) {
+  from,
+  locs,
+  locs_id = NULL,
+  radius = 0,
+  fun = "mean",
+  geom = FALSE,
+  ...
+) {
   #### prepare locations list
-  sites_list <- calc_prepare_locs(
+  sites_list <- amadeus::calc_prepare_locs(
     from = from,
     locs = locs,
     locs_id = locs_id,
@@ -1707,7 +1862,7 @@ calculate_narr <- function(
     narr_level <- NULL
   }
   #### perform extraction
-  sites_extracted <- calc_worker(
+  sites_extracted <- amadeus::calc_worker(
     dataset = "narr",
     from = from,
     locs_vector = sites_e,
@@ -1720,7 +1875,7 @@ calculate_narr <- function(
     level = narr_level,
     ...
   )
-  sites_return <- calc_return_locs(
+  sites_return <- amadeus::calc_return_locs(
     covar = sites_extracted,
     POSIXt = TRUE,
     geom = geom,
@@ -1776,15 +1931,16 @@ calculate_narr <- function(
 #' }
 #' @export
 calculate_geos <- function(
-    from,
-    locs,
-    locs_id = NULL,
-    radius = 0,
-    fun = "mean",
-    geom = FALSE,
-    ...) {
+  from,
+  locs,
+  locs_id = NULL,
+  radius = 0,
+  fun = "mean",
+  geom = FALSE,
+  ...
+) {
   #### prepare locations list
-  sites_list <- calc_prepare_locs(
+  sites_list <- amadeus::calc_prepare_locs(
     from = from,
     locs = locs,
     locs_id = locs_id,
@@ -1794,7 +1950,7 @@ calculate_geos <- function(
   sites_e <- sites_list[[1]]
   sites_id <- sites_list[[2]]
   #### perform extraction
-  sites_extracted <- calc_worker(
+  sites_extracted <- amadeus::calc_worker(
     dataset = "geos",
     from = from,
     locs_vector = sites_e,
@@ -1807,7 +1963,7 @@ calculate_geos <- function(
     level = 2,
     ...
   )
-  sites_return <- calc_return_locs(
+  sites_return <- amadeus::calc_return_locs(
     covar = sites_extracted,
     POSIXt = TRUE,
     geom = geom,
@@ -1855,15 +2011,16 @@ calculate_geos <- function(
 #' }
 #' @export
 calculate_population <- function(
-    from,
-    locs,
-    locs_id = NULL,
-    radius = 0,
-    fun = "mean",
-    geom = FALSE,
-    ...) {
+  from,
+  locs,
+  locs_id = NULL,
+  radius = 0,
+  fun = "mean",
+  geom = FALSE,
+  ...
+) {
   #### prepare locations list
-  sites_list <- calc_prepare_locs(
+  sites_list <- amadeus::calc_prepare_locs(
     from = from,
     locs = locs,
     locs_id = locs_id,
@@ -1882,7 +2039,7 @@ calculate_population <- function(
       "Calculating population covariates for ",
       name_split[4],
       " at ",
-      process_sedac_codes(
+      amadeus::process_sedac_codes(
         paste0(
           name_split[5],
           "_",
@@ -1894,7 +2051,7 @@ calculate_population <- function(
     )
   )
   #### perform extraction
-  sites_extracted <- calc_worker(
+  sites_extracted <- amadeus::calc_worker(
     dataset = "skip",
     from = from,
     locs_vector = sites_e,
@@ -1906,7 +2063,7 @@ calculate_population <- function(
     time_type = "year",
     ...
   )
-  sites_return <- calc_return_locs(
+  sites_return <- amadeus::calc_return_locs(
     covar = sites_extracted,
     POSIXt = FALSE,
     geom = geom,
@@ -1915,8 +2072,6 @@ calculate_population <- function(
   #### return data.frame
   return(sites_return)
 }
-
-
 
 
 #' Calculate roads covariates
@@ -1940,7 +2095,7 @@ calculate_population <- function(
 # nolint start
 #' @note Unit is km / sq km. The returned `data.frame` object contains a
 #' `$time` column to represent the temporal range covered by the
-#' dataset. For more information, see <https://earthdata.nasa.gov/data/catalog/sedac-ciesin-sedac-groads-v1-1.00>.
+#' dataset. For more information, see <https://data.nasa.gov/dataset/global-roads-open-access-data-set-version-1-groadsv1>.
 # nolint end
 #' @author Insang Song
 #' @seealso [`process_groads`]
@@ -1972,19 +2127,20 @@ calculate_population <- function(
 #' }
 #' @export
 calculate_groads <- function(
-    from = NULL,
-    locs = NULL,
-    locs_id = NULL,
-    radius = 1000,
-    fun = "sum",
-    geom = FALSE,
-    ...) {
+  from = NULL,
+  locs = NULL,
+  locs_id = NULL,
+  radius = 1000,
+  fun = "sum",
+  geom = FALSE,
+  ...
+) {
   #### check for null parameters
   if (radius <= 0) {
     stop("radius should be greater than 0.\n")
   }
   #### prepare locations list
-  sites_list <- calc_prepare_locs(
+  sites_list <- amadeus::calc_prepare_locs(
     from = from,
     locs = locs,
     locs_id = locs_id,
@@ -2017,13 +2173,15 @@ calculate_groads <- function(
   # km / sq km
   from_clip[["x"]] <- (from_clip[["x"]] * det_unit / 1e3)
   from_clip$density <-
-    from_clip[["x"]] / (area_buffer * (det_unit ^ 2) / 1e6)
+    from_clip[["x"]] / (area_buffer * (det_unit^2) / 1e6)
   from_clip <-
     setNames(
       from_clip,
-      c(locs_id,
+      c(
+        locs_id,
         sprintf("GRD_TOTAL_0_%05d", radius),
-        sprintf("GRD_DENKM_0_%05d", radius))
+        sprintf("GRD_DENKM_0_%05d", radius)
+      )
     )
   #### time period
   from_clip$description <- "1980 - 2010"
@@ -2034,7 +2192,7 @@ calculate_groads <- function(
     #### reorder
     from_clip_reorder <- from_clip[, c(1, 4, 2, 3)]
   }
-  sites_return <- calc_return_locs(
+  sites_return <- amadeus::calc_return_locs(
     covar = from_clip_reorder,
     POSIXt = TRUE,
     geom = geom,
@@ -2088,15 +2246,16 @@ calculate_groads <- function(
 #' }
 #' @export
 calculate_merra2 <- function(
-    from,
-    locs,
-    locs_id = NULL,
-    radius = 0,
-    fun = "mean",
-    geom = FALSE,
-    ...) {
+  from,
+  locs,
+  locs_id = NULL,
+  radius = 0,
+  fun = "mean",
+  geom = FALSE,
+  ...
+) {
   #### prepare locations list
-  sites_list <- calc_prepare_locs(
+  sites_list <- amadeus::calc_prepare_locs(
     from = from,
     locs = locs,
     locs_id = locs_id,
@@ -2114,7 +2273,7 @@ calculate_merra2 <- function(
     merra2_level <- NULL
   }
   #### perform extraction
-  sites_extracted <- calc_worker(
+  sites_extracted <- amadeus::calc_worker(
     dataset = "merra2",
     from = from,
     locs_vector = sites_e,
@@ -2127,7 +2286,7 @@ calculate_merra2 <- function(
     level = merra2_level,
     ...
   )
-  sites_return <- calc_return_locs(
+  sites_return <- amadeus::calc_return_locs(
     covar = sites_extracted,
     POSIXt = TRUE,
     geom = geom,
@@ -2179,15 +2338,16 @@ calculate_merra2 <- function(
 #' }
 #' @export
 calculate_gridmet <- function(
-    from,
-    locs,
-    locs_id = NULL,
-    radius = 0,
-    fun = "mean",
-    geom = FALSE,
-    ...) {
+  from,
+  locs,
+  locs_id = NULL,
+  radius = 0,
+  fun = "mean",
+  geom = FALSE,
+  ...
+) {
   #### prepare locations list
-  sites_list <- calc_prepare_locs(
+  sites_list <- amadeus::calc_prepare_locs(
     from = from,
     locs = locs,
     locs_id = locs_id,
@@ -2197,7 +2357,7 @@ calculate_gridmet <- function(
   sites_e <- sites_list[[1]]
   sites_id <- sites_list[[2]]
   #### perform extraction
-  sites_extracted <- calc_worker(
+  sites_extracted <- amadeus::calc_worker(
     dataset = "gridmet",
     from = from,
     locs_vector = sites_e,
@@ -2209,7 +2369,7 @@ calculate_gridmet <- function(
     time_type = "date",
     ...
   )
-  sites_return <- calc_return_locs(
+  sites_return <- amadeus::calc_return_locs(
     covar = sites_extracted,
     POSIXt = TRUE,
     geom = geom,
@@ -2267,15 +2427,16 @@ calculate_gridmet <- function(
 #' }
 #' @export
 calculate_terraclimate <- function(
-    from = NULL,
-    locs = NULL,
-    locs_id = NULL,
-    radius = 0,
-    fun = "mean",
-    geom = FALSE,
-    ...) {
+  from = NULL,
+  locs = NULL,
+  locs_id = NULL,
+  radius = 0,
+  fun = "mean",
+  geom = FALSE,
+  ...
+) {
   #### prepare locations list
-  sites_list <- calc_prepare_locs(
+  sites_list <- amadeus::calc_prepare_locs(
     from = from,
     locs = locs,
     locs_id = locs_id,
@@ -2285,7 +2446,7 @@ calculate_terraclimate <- function(
   sites_e <- sites_list[[1]]
   sites_id <- sites_list[[2]]
   #### perform extraction
-  sites_extracted <- calc_worker(
+  sites_extracted <- amadeus::calc_worker(
     dataset = "terraclimate",
     from = from,
     locs_vector = sites_e,
@@ -2297,7 +2458,7 @@ calculate_terraclimate <- function(
     time_type = "yearmonth",
     ...
   )
-  sites_return <- calc_return_locs(
+  sites_return <- amadeus::calc_return_locs(
     covar = sites_extracted,
     POSIXt = FALSE,
     geom = geom,
@@ -2360,13 +2521,14 @@ calculate_terraclimate <- function(
 # nolint end
 #' @export
 calculate_lagged <- function(
-    from,
-    date,
-    lag,
-    locs_id,
-    time_id = "time",
-    geom = FALSE) {
-  check_geom(geom)
+  from,
+  date,
+  lag,
+  locs_id,
+  time_id = "time",
+  geom = FALSE
+) {
+  amadeus::check_geom(geom)
   #### check years
   stopifnot(length(date) == 2)
   date <- date[order(as.Date(date))]
@@ -2412,8 +2574,8 @@ calculate_lagged <- function(
     )
     time_u <- from_u[[time_id]]
     #### extract variables
-    variables <- from_u[
-      , !(names(from_u) %in% c(locs_id, time_id)),
+    variables <- from_u[,
+      !(names(from_u) %in% c(locs_id, time_id)),
       drop = FALSE
     ]
     #### apply lag using dplyr::lag
@@ -2427,7 +2589,7 @@ calculate_lagged <- function(
     variables_return <- cbind(from_u[[locs_id]], time_u, variables_lag)
     colnames(variables_return)[1:2] <- c(locs_id, time_id)
     #### identify dates of interest
-    date_sequence <- generate_date_sequence(
+    date_sequence <- amadeus::generate_date_sequence(
       date[1],
       date[2],
       sub_hyphen = FALSE
@@ -2440,7 +2602,7 @@ calculate_lagged <- function(
   if (geom %in% c("sf", "terra")) {
     variables_merge <- merge(variables_merge, geoms)
   }
-  variables_return <- calc_return_locs(
+  variables_return <- amadeus::calc_return_locs(
     covar = variables_merge,
     POSIXt = TRUE,
     geom = geom,

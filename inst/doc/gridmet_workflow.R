@@ -7,37 +7,37 @@ knitr::opts_chunk$set(
 library(amadeus)
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  dir <- tempdir()
-#  amadeus::download_data(
-#    dataset_name = "gridmet",
-#    variable = "Near-Surface Specific Humidity",
-#    year = c(2019, 2020),
-#    directory_to_save = dir,
-#    acknowledgement = TRUE,
-#    download = TRUE,
-#    remove_command = TRUE,
-#    hash = TRUE
-#  )
+# dir <- tempdir()
+# amadeus::download_data(
+#   dataset_name = "gridmet",
+#   variable = "Near-Surface Specific Humidity",
+#   year = c(2019, 2020),
+#   directory_to_save = dir,
+#   acknowledgement = TRUE,
+#   download = TRUE,
+#   remove_command = TRUE,
+#   hash = TRUE
+# )
 
 ## ----echo = FALSE-------------------------------------------------------------
 cat('[1] "aa5116525468299d1fc483b108b3e841fc40d7e5"')
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  list.files(dir, recursive = TRUE, pattern = "sph")
+# list.files(dir, recursive = TRUE, pattern = "sph")
 
 ## ----echo = FALSE-------------------------------------------------------------
 cat('[1] "sph/sph_2019.nc" "sph/sph_2020.nc"')
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  sph_process <- amadeus::process_covariates(
-#    covariate = "gridmet",
-#    variable = "Near-Surface Specific Humidity",
-#    date = c("2019-12-18", "2020-01-10"),
-#    path = file.path(dir, "/sph")
-#  )
+# sph_process <- amadeus::process_covariates(
+#   covariate = "gridmet",
+#   variable = "Near-Surface Specific Humidity",
+#   date = c("2019-12-18", "2020-01-10"),
+#   path = file.path(dir, "/sph")
+# )
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  sph_process
+# sph_process
 
 ## ----echo = FALSE-------------------------------------------------------------
 cat('class       : SpatRaster 
@@ -55,21 +55,21 @@ time (days) : 2019-12-18 to 2020-01-10
 ')
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  terra::plot(sph_process[[1]])
+# terra::plot(sph_process[[1]])
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  library(tigris)
-#  sph_covar <- amadeus::calculate_covariates(
-#    covariate = "gridmet",
-#    from = sph_process,
-#    locs = tigris::counties("CA", year = 2019),
-#    locs_id = "NAME",
-#    radius = 0,
-#    geom = "terra"
-#  )
+# library(tigris)
+# sph_covar <- amadeus::calculate_covariates(
+#   covariate = "gridmet",
+#   from = sph_process,
+#   locs = tigris::counties("CA", year = 2019),
+#   locs_id = "NAME",
+#   radius = 0,
+#   geom = "terra"
+# )
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  sph_covar
+# sph_covar
 
 ## ----echo = FALSE-------------------------------------------------------------
 cat('class       : SpatVector 

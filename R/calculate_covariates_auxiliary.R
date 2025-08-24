@@ -23,10 +23,11 @@
 #' @return a data.frame or SpatVector object (depending on `from`)
 #' @export
 calc_setcolumns <- function(
-    from,
-    lag,
-    dataset,
-    locs_id) {
+  from,
+  lag,
+  dataset,
+  locs_id
+) {
   #### check from is data.frame
   stopifnot(class(from) %in% c("data.frame", "SpatVector"))
   #### original names
@@ -67,18 +68,39 @@ calc_setcolumns <- function(
   names_return[level_index] <- "level"
   #### dataset and genre
   datasets <- c(
-    "aqs", "ecoregions", "geos", "gmted", "koppen geiger", "merra2", "modis",
-    "narr", "nlcd", "hms", "groads", "pop", "tri", "nei", "gridmet",
+    "aqs",
+    "ecoregions",
+    "geos",
+    "gmted",
+    "koppen geiger",
+    "merra2",
+    "modis",
+    "narr",
+    "nlcd",
+    "hms",
+    "groads",
+    "pop",
+    "tri",
+    "nei",
+    "gridmet",
     "terraclimate"
   )
   stopifnot(dataset %in% datasets)
   genre <- substr(dataset, 1, 3)
   #### covariates
   cov_index <- which(
-    !(c(names_from %in% c(
-      locs_id, "geometry", "time", "lat", "lon", "level", "description"
+    !(c(
+      names_from %in%
+        c(
+          locs_id,
+          "geometry",
+          "time",
+          "lat",
+          "lon",
+          "level",
+          "description"
+        )
     ))
-    )
   )
   for (c in seq_along(cov_index)) {
     name_covariate <- names_return[cov_index[c]]
@@ -136,11 +158,12 @@ calc_setcolumns <- function(
 #' @keywords internal auxiliary
 #' @export
 calc_message <- function(
-    dataset,
-    variable,
-    time,
-    time_type,
-    level) {
+  dataset,
+  variable,
+  time,
+  time_type,
+  level
+) {
   message_time <- calc_time(time, time_type)
   if (dataset == "skip") {
     return()
@@ -148,7 +171,7 @@ calc_message <- function(
   if (dataset == "gmted") {
     return_message <- paste0(
       "Calculating ",
-      process_gmted_codes(
+      amadeus::process_gmted_codes(
         substr(
           variable,
           1,
@@ -158,7 +181,7 @@ calc_message <- function(
         invert = TRUE
       ),
       " covariates with ",
-      process_gmted_codes(
+      amadeus::process_gmted_codes(
         substr(
           variable,
           3,
@@ -218,28 +241,29 @@ calc_message <- function(
 #' @importFrom terra crs
 #' @export
 calc_prepare_locs <- function(
-    from,
-    locs,
-    locs_id,
-    radius,
-    geom = FALSE) {
+  from,
+  locs,
+  locs_id,
+  radius,
+  geom = FALSE
+) {
   #### check for null parameters
-  check_for_null_parameters(mget(ls()))
+  amadeus::check_for_null_parameters(mget(ls()))
   if (!locs_id %in% names(locs)) {
-    stop(sprintf("locs should include columns named %s.\n",
-                 locs_id)
-    )
+    stop(sprintf("locs should include columns named %s.\n", locs_id))
   }
   #### prepare sites
-  sites_e <- process_locs_vector(
+  sites_e <- amadeus::process_locs_vector(
     locs,
     terra::crs(from),
     radius
   )
   #### site identifiers and geometry
   # check geom
-  check_geom(geom)
-  if (geom %in% c("sf", "terra")) geom <- TRUE
+  amadeus::check_geom(geom)
+  if (geom %in% c("sf", "terra")) {
+    geom <- TRUE
+  }
   if (geom) {
     sites_id <- subset(
       terra::as.data.frame(sites_e, geom = "WKT"),
@@ -268,8 +292,9 @@ calc_prepare_locs <- function(
 #' @keywords internal auxiliary
 #' @export
 calc_time <- function(
-    time,
-    format) {
+  time,
+  format
+) {
   if (format == "timeless") {
     return(time)
   } else if (format == "date") {
@@ -360,18 +385,19 @@ calc_check_time <- function(
 #' @keywords internal auxiliary
 #' @export
 calc_worker <- function(
-    dataset,
-    from,
-    locs_vector,
-    locs_df,
-    fun,
-    variable = 1,
-    time,
-    time_type = c("date", "hour", "year", "yearmonth", "timeless"),
-    radius,
-    level = NULL,
-    max_cells = 1e8,
-    ...) {
+  dataset,
+  from,
+  locs_vector,
+  locs_df,
+  fun,
+  variable = 1,
+  time,
+  time_type = c("date", "hour", "year", "yearmonth", "timeless"),
+  radius,
+  level = NULL,
+  max_cells = 1e8,
+  ...
+) {
   #### empty location data.frame
   sites_extracted <- NULL
   time_type <- match.arg(time_type)
@@ -585,6 +611,12 @@ check_geom <- function(geom) {
 #' Default is `FALSE`, options with geometry are "sf" or "terra". The
 #' coordinate reference system of the `sf` or `SpatVector` is that of `from.`
 #' See [`exactextractr::exact_extract`] for details.
+#' @param scale character(1). Scale expression to be applied to the raw values.
+#' It is crucial that users review the technical documentatio of the MODIS product
+#' they are using to ensure proper scale.
+#' An example for the MOD11A1 product's LST_Day_1km variable (land surface temperature)
+#' would be `scale = "* 0.02"`.
+#' Default is `NULL`, which applies no scale.
 #' @param ... Placeholders.
 #' @description The function operates at MODIS/VIIRS products
 #' on a daily basis. Given that the raw hdf files are downloaded from
@@ -597,7 +629,7 @@ check_geom <- function(geom) {
 #' @seealso
 #' * Preprocessing: [process_modis_merge()], [process_modis_swath()],
 #'     [process_blackmarble()]
-#' @keywords auxiliary
+#' @keywords internal
 #' @author Insang Song
 #' @return a data.frame or SpatVector object.
 #' @importFrom terra extract project vect nlyr describe
@@ -630,6 +662,7 @@ calculate_modis_daily <- function(
   fun_summary = "mean",
   max_cells = 3e7,
   geom = FALSE,
+  scale = NULL,
   ...
 ) {
   if (!methods::is(locs, "SpatVector")) {
@@ -639,8 +672,7 @@ calculate_modis_daily <- function(
     }
   }
   if (!locs_id %in% names(locs)) {
-    stop(sprintf("locs should include columns named %s.\n",
-                 locs_id))
+    stop(sprintf("locs should include columns named %s.\n", locs_id))
   }
 
   extract_with_buffer <- function(
@@ -652,7 +684,9 @@ calculate_modis_daily <- function(
     maxcells = NULL
   ) {
     # generate buffers
-    if (radius == 0) radius <- 1e-6 # approximately 1 meter in degree
+    if (radius == 0) {
+      radius <- 1e-6
+    } # approximately 1 meter in degree
     bufs <- terra::buffer(points, width = radius, quadsegs = 180L)
     bufs <- terra::project(bufs, terra::crs(surf))
     # extract raster values
@@ -673,11 +707,18 @@ calculate_modis_daily <- function(
   ## NaN to NA
   from[is.nan(from)] <- NA
 
+  # apply scale as expression to `from` values
+  chr_scale <- paste0("from ", scale)
+  # Evaluate the scale expression
+  from_scale <- eval(parse(text = chr_scale)[[1]])
+
+  # from_scale[is.nan(from_scale)] <- NA
+
   # raster used to be vrt_today
   extracted <-
     extract_with_buffer(
       points = locs,
-      surf = from,
+      surf = from_scale,
       id = locs_id,
       radius = radius,
       func = fun_summary,
@@ -701,8 +742,7 @@ calculate_modis_daily <- function(
       locs_id = locs_id,
       radius = radius,
       geom = geom
-    )[[2]]
-    )
+    )[[2]])
     # merge
     extracted_merge <- merge(
       locs_geom_id,
@@ -723,4 +763,45 @@ calculate_modis_daily <- function(
   }
   gc()
   return(extracted_return)
+}
+
+#' Collapse listed NLCD values while filling in NA for sites outside data.
+#' @param data Buffered values from NLCD data.
+#' @param mode "exact" or "terra"
+#' @param locs extraction locations.
+#' @param locs_id character(1). Name of unique identifier.
+#' @keywords internal auxiliary
+#' @importFrom collapse rowbind
+#' @export
+collapse_nlcd <- function(
+  data,
+  mode = c("terra", "extract"),
+  locs = NULL,
+  locs_id = "site_id"
+) {
+  data_nonnull <- Filter(Negate(is.null), data)
+  data_rbind <- collapse::rowbind(data_nonnull, fill = TRUE)
+  if (mode == "terra") {
+    # Create a single-row NA data frame with the same structure
+    na_row <- data_rbind[1, , drop = FALSE]
+    na_row[] <- NA
+
+    # Replace all NULL elements with the NA row
+    data_na <- lapply(data, function(x) if (is.null(x)) na_row else x)
+
+    # Combine into a single data frame
+    data_filled <- collapse::rowbind(data_na, fill = TRUE)
+  } else {
+    stopifnot(!is.null(locs))
+
+    sites_wdata <- unlist(lapply(data, function(x) x[[locs_id]]))
+
+    sites_missing <- setdiff(unlist(locs[[locs_id]]), sites_wdata)
+
+    df_missing <- data.frame(setNames(list(sites_missing), locs_id))
+
+    data_filled <- collapse::rowbind(data_rbind, df_missing, fill = TRUE)
+  }
+
+  return(data_filled)
 }

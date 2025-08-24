@@ -5,7 +5,7 @@
 \title{Download land cover data}
 \usage{
 download_nlcd(
-  collection = "Coterminous United States",
+  product = "Land Cover",
   year = 2021,
   directory_to_save = NULL,
   acknowledgement = FALSE,
@@ -17,12 +17,12 @@ download_nlcd(
 )
 }
 \arguments{
-\item{collection}{character(1). \code{"Coterminous United States"} or \code{"Alaska"}.}
+\item{product}{character(1). "Land Cover", "Land Cover Change", "Land Cover Confidence",
+"Fractional Impervious Surface", "Impervious Descriptor", or
+"Spectral Change Day of Year ".}
 
-\item{year}{integer(1). Available years for Coterminous United States
-include \code{2001}, \code{2004}, \code{2006}, \code{2008}, \code{2011}, \code{2013}, \code{2016},
-\code{2019}, and \code{2021}.
-Available years for Alaska include \code{2001}, \code{2011}, and \code{2016}.}
+\item{year}{integer(1). Available years for Coterminous United States range
+from 1985 to 2023.}
 
 \item{directory_to_save}{character(1). Directory to save data. Two
 sub-directories will be created for the downloaded zip files ("/zip_files")
@@ -59,19 +59,17 @@ respective sub-directories within \code{directory_to_save}.
 }
 \description{
 The \code{download_nlcd()} function accesses and downloads
-land cover data from the
-\href{https://www.mrlc.gov/data}{Multi-Resolution Land Characteristics (MRLC) Consortium's National Land Cover Database (NLCD) products data base}.
+annual land cover data from the
+\href{https://www.mrlc.gov/data/project/annual-nlcd}{Multi-Resolution Land Characteristics (MRLC) Consortium's National Land Cover Database (NLCD) products data base}.
 }
 \examples{
 \dontrun{
 download_nlcd(
-  collection = "Coterminous United States",
+  product = "Land Cover",
   year = 2021,
   directory_to_save = tempdir(),
   acknowledgement = TRUE,
-  download = FALSE, # NOTE: download skipped for examples,
-  remove_command = TRUE,
-  unzip = FALSE
+  download = FALSE # NOTE: download skipped for examples
 )
 }
 }

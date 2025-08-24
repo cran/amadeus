@@ -7,37 +7,37 @@ knitr::opts_chunk$set(
 library(amadeus)
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  dir <- tempdir()
-#  amadeus::download_data(
-#    dataset_name = "terraclimate",
-#    variable = "Wind Speed",
-#    year = c(2021, 2022),
-#    directory_to_save = dir,
-#    acknowledgement = TRUE,
-#    download = TRUE,
-#    remove_command = TRUE,
-#    hash = TRUE
-#  )
+# dir <- tempdir()
+# amadeus::download_data(
+#   dataset_name = "terraclimate",
+#   variable = "Wind Speed",
+#   year = c(2021, 2022),
+#   directory_to_save = dir,
+#   acknowledgement = TRUE,
+#   download = TRUE,
+#   remove_command = TRUE,
+#   hash = TRUE
+# )
 
 ## ----echo = FALSE-------------------------------------------------------------
 cat('[1] "344cddba906371b701f661ccebeef3f427b2d8ec"')
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  list.files(dir, recursive = TRUE, pattern = "ws")
+# list.files(dir, recursive = TRUE, pattern = "ws")
 
 ## ----echo = FALSE-------------------------------------------------------------
 cat('[1] "ws/ws_2021.nc" "ws/ws_2022.nc"')
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  ws_process <- amadeus::process_covariates(
-#    covariate = "terraclimate",
-#    variable = "Wind Speed",
-#    date = c("2021-12-28", "2022-01-03"),
-#    path = file.path(dir, "/ws")
-#  )
+# ws_process <- amadeus::process_covariates(
+#   covariate = "terraclimate",
+#   variable = "Wind Speed",
+#   date = c("2021-12-28", "2022-01-03"),
+#   path = file.path(dir, "/ws")
+# )
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  ws_process
+# ws_process
 
 ## ----echo = FALSE-------------------------------------------------------------
 cat('class       : SpatRaster 
@@ -55,5 +55,5 @@ time (days) : 2021-12-01 to 2022-01-01
 ')
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  terra::plot(ws_process[[1]])
+# terra::plot(ws_process[[1]])
 

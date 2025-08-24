@@ -7,80 +7,93 @@ knitr::opts_chunk$set(
 library(amadeus)
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  dir <- tempdir()
-#  amadeus::download_data(
-#    dataset_name = "narr",
-#    variable = "air.2m",
-#    year = c(2021, 2022),
-#    directory_to_save = dir,
-#    acknowledgement = TRUE,
-#    download = TRUE,
-#    remove_command = TRUE,
-#    hash = TRUE
-#  )
+# dir <- tempdir()
+# amadeus::download_data(
+#   dataset_name = "narr",
+#   variable = "air.2m",
+#   year = c(2021, 2022),
+#   directory_to_save = dir,
+#   acknowledgement = TRUE,
+#   download = TRUE,
+#   remove_command = TRUE,
+#   hash = TRUE
+# )
 
 ## ----echo = FALSE-------------------------------------------------------------
-cat('[1] "e839448db9634a6534f89f5e8a1d18525dc3b206"')
+cat('[1] "3a382ac1c383c1d048f4044214cb450f"')
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  list.files(dir, recursive = TRUE, pattern = "air.2m")
+# list.files(dir, recursive = TRUE, pattern = "air.2m")
 
 ## ----echo = FALSE-------------------------------------------------------------
 cat('[1] "air.2m/air.2m.2021.nc" "air.2m/air.2m.2022.nc"')
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  air2m_process <- amadeus::process_covariates(
-#    covariate = "narr",
-#    variable = "air.2m",
-#    date = c("2021-12-28", "2022-01-03"),
-#    path = file.path(dir, "/air.2m")
-#  )
+# air2m_process <- amadeus::process_covariates(
+#   covariate = "narr",
+#   variable = "air.2m",
+#   date = c("2021-12-28", "2022-01-03"),
+#   path = file.path(dir, "/air.2m")
+# )
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  air2m_process
+# air2m_process
 
 ## ----echo = FALSE-------------------------------------------------------------
-cat('class       : SpatRaster 
+cat("class       : SpatRaster
 dimensions  : 277, 349, 7  (nrow, ncol, nlyr)
 resolution  : 32462.99, 32463  (x, y)
 extent      : -16231.49, 11313351, -16231.5, 8976020  (xmin, xmax, ymin, ymax)
-coord. ref. : +proj=lcc +lat_0=50 +lon_0=-107 +lat_1=50 +lat_2=50 +x_0=5632642.22547 +y_0=4612545.65137 +datum=WGS84 +units=m +no_defs 
-sources     : air.2m.2021.nc:air  (4 layers) 
-              air.2m.2022.nc:air  (3 layers) 
-varnames    : air (Daily Air Temperature at 2 m) 
-              air (Daily Air Temperature at 2 m) 
-names       : air.2~11228, air.2~11229, air.2~11230, air.2~11231, air.2~20101, air.2~20102, ... 
-unit        :           K,           K,           K,           K,           K,           K, ... 
-time        : 2021-12-28 to 2022-01-03 UTC 
-')
+coord. ref. : +proj=lcc +lat_0=50 +lon_0=-107 +lat_1=50 +lat_2=50 +x_0=5632642.22547 +y_0=4612545.65137 +datum=WGS84 +units=m +no_defs
+sources     : air.2m.2021.nc:air  (4 layers)
+              air.2m.2022.nc:air  (3 layers)
+varnames    : air (Daily Air Temperature at 2 m)
+              air (Daily Air Temperature at 2 m)
+names       : air.2~11228, air.2~11229, air.2~11230, air.2~11231, air.2~20101, air.2~20102, ...
+unit        :           K,           K,           K,           K,           K,           K, ...
+time        : 2021-12-28 to 2022-01-03 UTC
+")
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  terra::plot(air2m_process[[1]])
+# terra::plot(air2m_process[[1]])
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  library(tigris)
-#  air2m_covar <- amadeus::calculate_covariates(
-#    covariate = "narr",
-#    from = air2m_process,
-#    locs = tigris::counties("NC", year = 2021),
-#    locs_id = "NAME",
-#    radius = 0,
-#    geom = "terra"
-#  )
+# library(tigris)
+# air2m_covar <- amadeus::calculate_covariates(
+#   covariate = "narr",
+#   from = air2m_process,
+#   locs = tigris::counties("NC", year = 2021),
+#   locs_id = "NAME",
+#   radius = 0,
+#   geom = "terra"
+# )
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  air2m_covar
+# air2m_covar
 
 ## ----echo = FALSE-------------------------------------------------------------
-cat('class       : SpatVector 
-geometry    : polygons 
+cat("class       : SpatVector
+geometry    : polygons
 dimensions  : 700, 3  (geometries, attributes)
 extent      : 7731783, 8506154, 3248490, 3694532  (xmin, xmax, ymin, ymax)
-coord. ref. : +proj=lcc +lat_0=50 +lon_0=-107 +lat_1=50 +lat_2=50 +x_0=5632642.22547 +y_0=4612545.65137 +datum=WGS84 +units=m +no_defs 
+coord. ref. : +proj=lcc +lat_0=50 +lon_0=-107 +lat_1=50 +lat_2=50 +x_0=5632642.22547 +y_0=4612545.65137 +datum=WGS84 +units=m +no_defs
 names       :     NAME       time air.2m_0
 type        :    <chr>   <POSIXt>    <num>
 values      :  Chatham 2021-12-28    289.3
               Alamance 2021-12-28    288.8
               Davidson 2021-12-28    289.1
-')
+")
+
+## ----eval = FALSE-------------------------------------------------------------
+# head(aggregate(air.2m_0 ~ NAME, data = air2m_covar, FUN = mean))
+
+## ----echo = FALSE-------------------------------------------------------------
+cat("       NAME air.2m_0
+1  Alamance 289.5930
+2 Alexander 289.1961
+3 Alleghany 286.9486
+4     Anson 290.5306
+5      Ashe 285.5771
+6     Avery 285.2288
+")
 
