@@ -7,37 +7,37 @@ knitr::opts_chunk$set(
 library(amadeus)
 
 ## ----eval = FALSE-------------------------------------------------------------
-# dir <- tempdir()
-# amadeus::download_data(
-#   dataset_name = "narr",
-#   variable = "air.2m",
-#   year = c(2021, 2022),
-#   directory_to_save = dir,
-#   acknowledgement = TRUE,
-#   download = TRUE,
-#   remove_command = TRUE,
-#   hash = TRUE
-# )
+#  dir <- tempdir()
+#  amadeus::download_data(
+#    dataset_name = "narr",
+#    variable = "air.2m",
+#    year = c(2021, 2022),
+#    directory_to_save = dir,
+#    acknowledgement = TRUE,
+#    download = TRUE,
+#    remove_command = TRUE,
+#    hash = TRUE
+#  )
 
 ## ----echo = FALSE-------------------------------------------------------------
 cat('[1] "3a382ac1c383c1d048f4044214cb450f"')
 
 ## ----eval = FALSE-------------------------------------------------------------
-# list.files(dir, recursive = TRUE, pattern = "air.2m")
+#  list.files(dir, recursive = TRUE, pattern = "air.2m")
 
 ## ----echo = FALSE-------------------------------------------------------------
 cat('[1] "air.2m/air.2m.2021.nc" "air.2m/air.2m.2022.nc"')
 
 ## ----eval = FALSE-------------------------------------------------------------
-# air2m_process <- amadeus::process_covariates(
-#   covariate = "narr",
-#   variable = "air.2m",
-#   date = c("2021-12-28", "2022-01-03"),
-#   path = file.path(dir, "/air.2m")
-# )
+#  air2m_process <- amadeus::process_covariates(
+#    covariate = "narr",
+#    variable = "air.2m",
+#    date = c("2021-12-28", "2022-01-03"),
+#    path = file.path(dir, "/air.2m")
+#  )
 
 ## ----eval = FALSE-------------------------------------------------------------
-# air2m_process
+#  air2m_process
 
 ## ----echo = FALSE-------------------------------------------------------------
 cat("class       : SpatRaster
@@ -55,21 +55,21 @@ time        : 2021-12-28 to 2022-01-03 UTC
 ")
 
 ## ----eval = FALSE-------------------------------------------------------------
-# terra::plot(air2m_process[[1]])
+#  terra::plot(air2m_process[[1]])
 
 ## ----eval = FALSE-------------------------------------------------------------
-# library(tigris)
-# air2m_covar <- amadeus::calculate_covariates(
-#   covariate = "narr",
-#   from = air2m_process,
-#   locs = tigris::counties("NC", year = 2021),
-#   locs_id = "NAME",
-#   radius = 0,
-#   geom = "terra"
-# )
+#  library(tigris)
+#  air2m_covar <- amadeus::calculate_covariates(
+#    covariate = "narr",
+#    from = air2m_process,
+#    locs = tigris::counties("NC", year = 2021),
+#    locs_id = "NAME",
+#    radius = 0,
+#    geom = "terra"
+#  )
 
 ## ----eval = FALSE-------------------------------------------------------------
-# air2m_covar
+#  air2m_covar
 
 ## ----echo = FALSE-------------------------------------------------------------
 cat("class       : SpatVector
@@ -85,7 +85,7 @@ values      :  Chatham 2021-12-28    289.3
 ")
 
 ## ----eval = FALSE-------------------------------------------------------------
-# head(aggregate(air.2m_0 ~ NAME, data = air2m_covar, FUN = mean))
+#  head(aggregate(air.2m_0 ~ NAME, data = air2m_covar, FUN = mean))
 
 ## ----echo = FALSE-------------------------------------------------------------
 cat("       NAME air.2m_0
