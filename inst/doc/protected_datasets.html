@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Kyle Messier, Mitchell Manware" />
+
+<meta name="date" content="2024-07-09" />
+
+<title>Protected Data Sources</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Protected Data Sources</h1>
+<h4 class="author">Kyle Messier, Mitchell Manware</h4>
+<h4 class="date">2024-07-09</h4>
+
+
+
+<p>The <code>download_data</code> function from <code>amadeus</code>
+provides access to a variety of publicly available environmental data
+sources. Although publicly available, certain data sources are protected
+and require users to provide login credentials before accessing and
+downloading the data. Datasets from the National Aeronautics and Space
+Administration (NASA), for example, require users to have and provide
+credentials for a NASA EarthData account.</p>
+<div id="motivation" class="section level2">
+<h2>Motivation</h2>
+<p>This vignette will demonstrate how to create a NASA EarthData
+Account, generate a personal access token, and configure
+<code>amadeus</code> to authenticate automatically using that token.</p>
+</div>
+<div id="nasa-earthdata-account" class="section level2">
+<h2>NASA EarthData Account</h2>
+<p>Visit <a href="https://urs.earthdata.nasa.gov/">https://urs.earthdata.nasa.gov/</a>
+to register for or log into a NASA EarthData account.</p>
+<p>Account registration provides access to NASA’s Earth Observing System
+Data and Information System (EOSDIS) and its twelve Distributed Active
+Archive Centers (DAAC), including:</p>
+<ul>
+<li><p>Alaska Satellite Facility (ASF) DAAC</p></li>
+<li><p>Atmospheric Science Data Center (ASDC)</p></li>
+<li><p>Crustal Dynamics Data Information System (CDDIS)</p></li>
+<li><p>Global Hydrometeorology Resource Center (GHRC)</p></li>
+<li><p>Goddard Earth Sciences Data and Information Services Center (GES
+DISC)</p></li>
+<li><p>Land Processes DAAC (LP DAAC)</p></li>
+<li><p>Level 1 and Atmosphere Archive and Distribution System (LAADS)
+DAAC</p></li>
+<li><p>National Snow and Ice Data Center (NSIDC) DAAC</p></li>
+<li><p>Oak Ridge National Laboratory (ORNL) DAAC</p></li>
+<li><p>Ocean Biology DAAC (OB.DAAC)</p></li>
+<li><p>Physical Oceanography DAAC (PO.DAAC)</p></li>
+<li><p>Socioeconomic Data and Applications Center (SEDAC)</p>
+<p><a href="https://www.earthdata.nasa.gov/centers" class="uri">https://www.earthdata.nasa.gov/centers</a> for more
+information.</p></li>
+</ul>
+<div id="approved-applications" class="section level3">
+<h3>Approved applications</h3>
+<p>After creating an account, navigate to “My Profile” (<a href="https://urs.earthdata.nasa.gov/profile" class="uri">https://urs.earthdata.nasa.gov/profile</a>), and then to
+“Applications &gt; Authorized Apps”. This “Authorized Apps” page
+specifies which NASA EarthData applications can use your login
+credentials. For this example, ensure that authorization is enabled for
+“SEDAC Website”, “SEDAC Website (Alpha)”, and “SEDAC Website
+(Beta)”.</p>
+</div>
+</div>
+<div id="generating-a-nasa-earthdata-token" class="section level2">
+<h2>Generating a NASA EarthData Token</h2>
+<p>With a NASA EarthData account set up and the required applications
+authorized, generate a personal access token to use with
+<code>amadeus</code>.</p>
+<ol style="list-style-type: decimal">
+<li>Log in to <a href="https://urs.earthdata.nasa.gov/">https://urs.earthdata.nasa.gov/</a></li>
+<li>Navigate to “My Profile” → “Generate Token”</li>
+<li>Click “Generate Token” and copy the resulting token string</li>
+</ol>
+<p>Tokens expire after 90 days. Repeat these steps to generate a new
+token when needed.</p>
+</div>
+<div id="setting-up-authentication-in-r" class="section level2">
+<h2>Setting Up Authentication in R</h2>
+<p><code>amadeus</code> provides <code>setup_nasa_token()</code> to
+securely store your token so it is available in every R session without
+ever appearing in scripts or version-controlled files.</p>
+<div id="recommended-persist-in-.renviron" class="section level3">
+<h3>Recommended: persist in <code>~/.Renviron</code></h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Interactively prompts for the token, then writes to ~/.Renviron</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">setup_nasa_token</span>(<span class="at">method =</span> <span class="st">&quot;renviron&quot;</span>)</span></code></pre></div>
+<p>After running this command, restart R (or run
+<code>readRenviron(&quot;~/.Renviron&quot;)</code>) for the environment variable
+<code>NASA_EARTHDATA_TOKEN</code> to take effect. Subsequent R sessions
+will pick up the token automatically.</p>
+<p>Alternatively, pass the token directly:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setup_nasa_token</span>(<span class="at">method =</span> <span class="st">&quot;renviron&quot;</span>, <span class="at">token =</span> <span class="st">&quot;your_token_here&quot;</span>)</span></code></pre></div>
+</div>
+<div id="save-to-a-token-file" class="section level3">
+<h3>Save to a token file</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Saves token to ~/.nasa_earthdata_token (permissions set to user-only)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">setup_nasa_token</span>(<span class="at">method =</span> <span class="st">&quot;file&quot;</span>, <span class="at">token =</span> <span class="st">&quot;your_token_here&quot;</span>)</span></code></pre></div>
+<p>Pass the file path to individual download functions:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">download_data</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">dataset_name =</span> <span class="st">&quot;sedac_population&quot;</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">year =</span> <span class="st">&quot;2020&quot;</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data_format =</span> <span class="st">&quot;GeoTIFF&quot;</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data_resolution =</span> <span class="st">&quot;60 minute&quot;</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">directory_to_save =</span> <span class="st">&quot;./sedac_population&quot;</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">acknowledgement =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">nasa_earth_data_token =</span> <span class="st">&quot;~/.nasa_earthdata_token&quot;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="current-session-only" class="section level3">
+<h3>Current session only</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sets the token for the current R session only (lost on exit)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">setup_nasa_token</span>(<span class="at">method =</span> <span class="st">&quot;session&quot;</span>, <span class="at">token =</span> <span class="st">&quot;your_token_here&quot;</span>)</span></code></pre></div>
+<p>Or set the environment variable manually:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Sys.setenv</span>(<span class="at">NASA_EARTHDATA_TOKEN =</span> <span class="st">&quot;your_token_here&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="how-amadeus-uses-the-token" class="section level2">
+<h2>How <code>amadeus</code> Uses the Token</h2>
+<p>All NASA download functions (MERRA-2, MODIS, GEOS-CF, SEDAC
+population, SEDAC groads) call <code>get_token()</code> internally. The
+lookup priority is:</p>
+<ol style="list-style-type: decimal">
+<li><code>NASA_EARTHDATA_TOKEN</code> environment variable (set via
+<code>~/.Renviron</code> or <code>Sys.setenv()</code>) —
+<strong>recommended</strong></li>
+<li>File path passed as <code>nasa_earth_data_token</code> argument</li>
+<li>Token string passed directly as <code>nasa_earth_data_token</code>
+argument (not recommended for scripts)</li>
+</ol>
+<p>Once the token is configured in <code>~/.Renviron</code>, no extra
+arguments are needed:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># NASA_EARTHDATA_TOKEN is read automatically from the environment</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">download_data</span>(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">dataset_name =</span> <span class="st">&quot;sedac_population&quot;</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">year =</span> <span class="st">&quot;2020&quot;</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data_format =</span> <span class="st">&quot;GeoTIFF&quot;</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">data_resolution =</span> <span class="st">&quot;60 minute&quot;</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">directory_to_save =</span> <span class="st">&quot;./sedac_population&quot;</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">acknowledgement =</span> <span class="cn">TRUE</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## Using token from environment variable: NASA_EARTHDATA_TOKEN
+## Downloading requested files...
+## Requested files have been downloaded.
+## Unzipping files...
+## Files unzipped and saved in ./sedac_population/.</code></pre>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<ul>
+<li>EOSDIS Distributed Active Archive Centers (DAAC). <em>National
+Aeronautics and Space Administration (NASA)</em>. Date accessed: January
+3, 2024. <a href="https://www.earthdata.nasa.gov/centers" class="uri">https://www.earthdata.nasa.gov/centers</a>.</li>
+<li>NASA EarthData Token Documentation. <em>National Aeronautics and
+Space Administration (NASA)</em>. <a href="https://urs.earthdata.nasa.gov/documentation/for_users/user_token" class="uri">https://urs.earthdata.nasa.gov/documentation/for_users/user_token</a>.</li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
